@@ -22,11 +22,13 @@ find_package (SFML REQUIRED graphics window system)
 add_executable(
 
     ${PROJECT_NAME}
-    
+
     src/Main.cpp
     src/Core.hpp
     src/Core.cpp
-
+    src/Utils.hpp
+    src/Celestial/Body.hpp
+    src/Celestial/Body.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} ${SFML_LIBRARIES} ${SFML_DEPENDENCIES} ${ADDITIONAL_LINK_FLAGS})

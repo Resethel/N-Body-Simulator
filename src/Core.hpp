@@ -6,8 +6,11 @@
 #ifndef CORE_HPP
 #define CORE_HPP
 
+#include <vector>
 #include <SFML/Graphics.hpp>
 #include <SFML/System/Time.hpp>
+
+#include "Celestial/Body.hpp"
 
 class Core
 {
@@ -28,6 +31,9 @@ private:
     static const sf::Time	TimePerFrame;
 
     sf::RenderWindow        mMainWindow;
+
+
+    std::vector<Celestial::Body> planets;
 
 
 };
