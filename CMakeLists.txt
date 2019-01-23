@@ -16,8 +16,6 @@ set (CMAKE_CXX_EXTENSIONS OFF)
 set (CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 find_package (SFML REQUIRED graphics window system)
 
-
-
 # Creates the executable
 add_executable(
 
@@ -29,6 +27,8 @@ add_executable(
     src/Utils.hpp
     src/Celestial/Body.hpp
     src/Celestial/Body.cpp
+    src/Celestial/Sim.hpp
+    src/Celestial/Sim.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} ${SFML_LIBRARIES} ${SFML_DEPENDENCIES} ${ADDITIONAL_LINK_FLAGS})

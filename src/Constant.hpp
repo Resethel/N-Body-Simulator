@@ -10,7 +10,7 @@
 namespace CONSTANT
 {
 
-    const double G = 6.673e-3;   // gravitational constant
+    const double G = 6.673e1;   // gravitational constant
     const double SOLAR_MASS = 1.98892e30;
 }
 

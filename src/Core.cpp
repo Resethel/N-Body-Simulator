@@ -11,7 +11,15 @@ const sf::Time Core::TimePerFrame = sf::seconds(1.f/60.f);
 
 Core::Core()
 : mMainWindow(sf::VideoMode(1600,1200), "N-Body-Simulator", sf::Style::Close)
-{}
+, mSimulator(mMainWindow)
+, mousePreviousPosition(sf::Mouse::getPosition(mMainWindow))
+, moving(false)
+, zoom(1)
+, view(mMainWindow.getDefaultView())
+{
+    mMainWindow.setFramerateLimit(60);
+    mSimulator.stop();
+}
 
 
 ////////// Methods
@@ -24,17 +32,8 @@ void Core::run()
 
     unsigned updateRealised;
 
-    // Test planets
-    Celestial::Body planet1(50,50,100,0,5.f);
-    Celestial::Body planet2(800,600,0,0,6065500000.f);
-    Celestial::Body planet3(600,1000,270,50,4500);
-    Celestial::Body planet4(600,200,250,-50,4500000000);
+    mSimulator.populate(5000,800,600,10000);
 
-
-    planets.push_back(std::move(planet1));
-    planets.push_back(std::move(planet2));
-    planets.push_back(std::move(planet3));
-    planets.push_back(std::move(planet4));
 
     // Run the program as long as the window is open
     while (mMainWindow.isOpen())
@@ -64,27 +63,12 @@ void Core::run()
 
 void Core::update(sf::Time dt)
 {
-    for (int i = 0; i < planets.size(); i++)
-    {
-      planets[i].resetForce();
-      //Notice-2 loops-->N^2 complexity
-      for (int j = 0; j < planets.size(); j++)
-      {
-        if (i != j)
-            planets[i].addForce(planets[j]);
-      }
-    }
-
-    //Then, loop again and update the bodies using timestep dt
-    for (int i = 0; i < planets.size(); i++)
-    {
-        planets[i].update(dt);
-    }
-
+    mSimulator.update(dt);
 }
 
 void Core::processInput()
 {
+    mousePreviousPosition = sf::Mouse::getPosition(mMainWindow);
     // Check all the window's events that were triggered since the last iteration of the loop
     sf::Event event;
     while (mMainWindow.pollEvent(event))
@@ -94,10 +78,32 @@ void Core::processInput()
         {
             mMainWindow.close();
         }
+
+
         if (event.type == sf::Event::KeyReleased)
         {
-            //update(TimePerFrame);
+            mSimulator.run();
         }
+
+        if (event.type == sf::Event::MouseWheelScrolled)
+        {
+            // Ignore the mouse wheel unless we're not moving
+            if (!moving)
+            {
+                // Determine the scroll direction and adjust the zoom level
+                if (event.mouseWheelScroll.delta <= -1)
+                    zoom = std::min(50.f, zoom + .1f);
+                else if (event.mouseWheelScroll.delta >= 1)
+                    zoom = std::max(.1f, zoom - .1f);
+
+                // Update our view
+                view.setSize(mMainWindow.getDefaultView().getSize()); // Reset the size
+                view.zoom(zoom); // Apply the zoom level (this transforms the view)
+                mMainWindow.setView(view);
+            }
+        }
+
+
     }
 }
 
@@ -105,10 +111,7 @@ void Core::render()
 {
     mMainWindow.clear(sf::Color::Black);
 
-    for(auto& body : planets)
-    {
-        mMainWindow.draw(body);
-    }
+    mSimulator.render();
 
     // End of the current frame
     mMainWindow.display();

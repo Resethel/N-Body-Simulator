@@ -19,10 +19,17 @@ namespace Celestial
     {
         this->setPosition(rx,ry);
 
+        calculateRadius();
         mBody.setFillColor(sf::Color::Yellow);
-        mBody.setRadius(10);
+        mBody.setRadius(mRadius);
         utils::centerOrigin<sf::CircleShape>(mBody);
+
+
     }
+
+    Body::Body(sf::Vector2d pos, sf::Vector2d vel, double mass, double density)
+    : Body(pos.x,pos.y,vel.x,vel.y,mass,density)
+    {}
 
 ////////// Methods
 
@@ -55,6 +62,11 @@ namespace Celestial
 
     }
 
+    bool Body::hasCollidedWith(const Body &body) const
+    {
+        return distanceTo(body) < mRadius + body.mRadius;
+    }
+
     void Body::resetForce()
     {
         mForce = sf::Vector2d(0,0);
@@ -65,6 +77,11 @@ namespace Celestial
     double Body::getMass() const
     {
         return mMass;
+    }
+
+    float Body::getRadius() const
+    {
+        return mRadius;
     }
 
     sf::Vector2d Body::getVelocity() const
@@ -87,12 +104,46 @@ namespace Celestial
         mRadius = std::cbrt((3 * mMass) / (4 * M_PI * mDensity));
     }
 
+
 ////////// Draw
 
     void Body::draw(sf::RenderTarget& target, sf::RenderStates states) const
     {
         states.transform *= this->getTransform();
         target.draw(mBody, states);
+    }
+
+
+
+/////////// Operator Overload
+
+    bool Body::operator==(const Body& rhs)
+    {
+        return (getPosition() == rhs.getPosition() and
+                mMass == rhs.mMass and
+                mDensity == rhs.mDensity and
+                mVelocity == rhs.mVelocity);
+    }
+    bool Body::operator!=(const Body& rhs)
+    {
+        return !(*this == rhs);
+    }
+
+    Body Body::operator+(const Body& rhs)
+    {
+
+        double total_mass = mMass + rhs.mMass;
+        // We first find the contribution of each planet depending on their masses
+        double ratio_1 = mMass / (total_mass);
+    	double ratio_2 = 1 - ratio_1;
+
+        sf::Vector2d pos1(getPosition()), pos2(rhs.getPosition());
+        auto velocity   = ratio_1 * mVelocity + ratio_2 * rhs.mVelocity;
+        auto density    = ratio_1 * mDensity  + ratio_2 * rhs.mDensity;
+        auto position   = ratio_1 * pos1      + ratio_2 * pos2;
+
+        return Body(position,velocity,total_mass,density);
+
     }
 
 }

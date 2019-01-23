@@ -7,6 +7,7 @@
 #define UTILS_HPP
 
 #include <algorithm>
+#include <cmath>
 #include <random>
 
 #include <SFML/Graphics.hpp>
@@ -32,6 +33,33 @@ namespace utils
        auto bounds = object.getLocalBounds();
        object.setOrigin(bounds.width/2.f, bounds.height/2.f);
    }
+
+   template <typename T>
+   inline T normalize(const T& vector)
+   {
+       auto norm = std::sqrt(vector.x * vector.x + vector.y * vector.y);
+       return T(vector.x/norm, vector.y/norm);
+   }
+
+   template <typename T>
+   inline sf::Vector2<T> normalize(const T& vec_x, const T& vec_y)
+   {
+       auto norm = std::sqrt(vec_x * vec_x+ vec_y * vec_y);
+       return sf::Vector2<T>(vec_x/norm, vec_y/norm);
+   }
+
+   template <typename T>
+   inline T norm(sf::Vector2<T>& vec)
+   {
+       return std::sqrt(vec.x * vec.x+ vec.y * vec.y);
+   }
+
+   template <typename T>
+   inline T norm(const T& vec_x, const T& vec_y)
+   {
+       return std::sqrt(vec_x * vec_x + vec_y * vec_y);
+   }
+
 
 } // utils
 

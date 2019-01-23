@@ -10,6 +10,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/System/Time.hpp>
 
+#include "Celestial/Sim.hpp"
 #include "Celestial/Body.hpp"
 
 class Core
@@ -31,10 +32,15 @@ private:
     static const sf::Time	TimePerFrame;
 
     sf::RenderWindow        mMainWindow;
+    Celestial::Sim          mSimulator;
 
+    // mouse related
+    sf::Vector2i            mousePreviousPosition;
+    bool                    moving;
 
-    std::vector<Celestial::Body> planets;
-
+    // window related
+    float                   zoom;
+    sf::View                view;
 
 };
 
