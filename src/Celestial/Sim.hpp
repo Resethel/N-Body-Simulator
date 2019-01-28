@@ -33,8 +33,9 @@ namespace Celestial
 
         // Methods
         void    addCelestialBody(Body& b);
+        void    removeCelestialBody(const unsigned& ind);
         void    handleEvent(const sf::Event& event);
-        void    populate(int number, int center_x, int center_y, int radius);
+        void    populate(size_t number, int center_x, int center_y, int radius);
         void    update(sf::Time dt);
 
         bool    isRunning() const;
@@ -42,6 +43,8 @@ namespace Celestial
         void    stop();
 
         void    render() const;
+
+        void    explodePlanet(const int& ind);
 
     protected:
         // Internal handling

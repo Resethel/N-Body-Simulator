@@ -22,8 +22,8 @@ namespace Celestial
     {
     public:
         // Constructor
-        Body(double rx, double ry, double vx, double vy, double mass, double density = 1);
-        Body(sf::Vector2d pos, sf::Vector2d vel, double mass, double density = 1);
+        Body(double rx, double ry, double vx, double vy, double mass);
+        Body(sf::Vector2d pos, sf::Vector2d vel, double mass);
 
         // Methods
         void    update(sf::Time dt);
@@ -34,7 +34,9 @@ namespace Celestial
         bool    hasCollidedWith(const Body& body) const;
         void    resetForce();
         void    updateVelocity(const Body& b, sf::Time dt);
+        void    explode();
 
+        bool   isInsideRocheLimitOf(const Body& Primary) const;
         // Getters
         double          getMass() const;
         float           getRadius() const;
@@ -43,6 +45,10 @@ namespace Celestial
         // Setters
 
         void setColor(const sf::Color& color);
+
+        // static functions
+
+        static double rocheLimit(const Body& Primary, const Body& Secondary);
 
 
     protected:

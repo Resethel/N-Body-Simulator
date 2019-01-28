@@ -32,7 +32,7 @@ void Core::run()
 
     unsigned updateRealised;
 
-    mSimulator.populate(5000,800,600,10000);
+    mSimulator.populate(1000,800,600,1500);
 
 
     // Run the program as long as the window is open
@@ -94,7 +94,7 @@ void Core::processInput()
                 if (event.mouseWheelScroll.delta <= -1)
                     zoom = std::min(50.f, zoom + .1f);
                 else if (event.mouseWheelScroll.delta >= 1)
-                    zoom = std::max(.1f, zoom - .1f);
+                    zoom = std::max(.5f, zoom - .1f);
 
                 // Update our view
                 view.setSize(mMainWindow.getDefaultView().getSize()); // Reset the size
@@ -109,10 +109,9 @@ void Core::processInput()
 
 void Core::render()
 {
-    mMainWindow.clear(sf::Color::Black);
+    mMainWindow.clear(sf::Color(10, 10, 10));
 
     mSimulator.render();
-
     // End of the current frame
     mMainWindow.display();
 }

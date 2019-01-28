@@ -20,6 +20,8 @@ namespace sf
 namespace utils
 {
 
+    static std::mt19937 rng;
+
    template <typename T>
    inline T clamp(const T& n, const T& lower, const T& upper)
    {
@@ -58,6 +60,13 @@ namespace utils
    inline T norm(const T& vec_x, const T& vec_y)
    {
        return std::sqrt(vec_x * vec_x + vec_y * vec_y);
+   }
+
+   template <typename T>
+   inline T rand(T min, T max)
+   {
+       std::uniform_int_distribution<T> uni_dist(min, max);
+       return uni_dist(rng);
    }
 
 
