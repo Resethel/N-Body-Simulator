@@ -31,12 +31,14 @@ private:
 
     static const sf::Time	TimePerFrame;
 
+    // Simulation
     sf::RenderWindow        mMainWindow;
     Celestial::Sim          mSimulator;
+    float                   mTimeStepMultiplier;
 
     // mouse related
-    sf::Vector2i            mousePreviousPosition;
-    bool                    moving;
+    sf::Vector2f            oldMousePosition;
+    bool                    draggingView;
 
     // window related
     float                   zoom;

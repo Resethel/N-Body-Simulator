@@ -108,6 +108,17 @@ namespace Celestial
         mBody.setFillColor(color);
     }
 
+    void Body::setVelocity(const double& vx, const double& vy)
+    {
+        mVelocity.x = vx;
+        mVelocity.y = vy;
+    }
+
+    void Body::setVelocity(const sf::Vector2d& vel)
+    {
+        setVelocity(vel.x,vel.y);
+    }
+
 //////// Static
 
     double Body::rocheLimit(const Body &Primary, const Body &Secondary)

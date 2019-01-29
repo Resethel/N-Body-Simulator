@@ -7,6 +7,7 @@
 #define CELESTIAL_BODY_HPP
 
 #include <cmath>
+#include <memory>
 
 #include <SFML/Graphics.hpp>
 
@@ -20,6 +21,10 @@ namespace Celestial
 
     class Body : public sf::Transformable, public sf::Drawable
     {
+    public:
+
+        typedef std::shared_ptr<Body> Ptr;
+
     public:
         // Constructor
         Body(double rx, double ry, double vx, double vy, double mass);
@@ -44,7 +49,9 @@ namespace Celestial
 
         // Setters
 
-        void setColor(const sf::Color& color);
+        void    setColor(const sf::Color& color);
+        void    setVelocity(const double& vx, const double& vy);
+        void    setVelocity(const sf::Vector2d& vel);
 
         // static functions
 

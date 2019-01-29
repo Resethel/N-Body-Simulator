@@ -10,12 +10,88 @@ namespace Celestial
 {
 
     Sim::Sim(sf::RenderWindow& window)
-    : mIsRunning(false)
-    , mLinkedWindow(&window)
+    : mLinkedWindow(&window)
     , mPlanetArray()
+    , mIsRunning(false)
+    , mouseHeldDown(false)
+    , mTempBody(nullptr)
+    , mSpeedVector()
     {}
 
 ////////// Methods
+
+    void Sim::update(sf::Time dt)
+    {
+        if(isRunning())
+        {
+            // Collisions are calculated first
+            handleCollisions();
+
+            for (size_t i(0) ; i < mPlanetArray.size(); i++)
+            {
+                mPlanetArray[i].resetForce();
+                //Note: 2 loops --> N^2 complexity
+                for (size_t j(0) ; j < mPlanetArray.size(); j++)
+                {
+                    if (i != j)
+                        mPlanetArray[i].addForce(mPlanetArray[j]);
+                }
+            }
+
+            //Then, loop again and update the bodies using timestep dt
+            for (int i = 0; i < mPlanetArray.size(); i++)
+            {
+                mPlanetArray[i].update(dt);
+            }
+        }
+
+    }
+
+
+    void Sim::handleEvent(const sf::Event& event)
+    {
+        if(event.type == sf::Event::MouseButtonPressed and event.mouseButton.button == sf::Mouse::Left)
+        {
+            if(!mouseHeldDown and sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
+            {
+                mouseHeldDown = true;
+                auto mousePos = mLinkedWindow->mapPixelToCoords(sf::Mouse::getPosition(*mLinkedWindow));
+                mTempBody = std::make_shared<Body>(mousePos.x, mousePos.y,0,0,50);
+            }
+        }
+
+        if(event.type == sf::Event::MouseButtonReleased)
+        {
+            if(mouseHeldDown and mTempBody)
+            {
+                mouseHeldDown = false;
+                auto mousePos = mLinkedWindow->mapPixelToCoords(sf::Mouse::getPosition(*mLinkedWindow));
+                double mass = mTempBody->getMass();
+                auto delta = mTempBody->getPosition() - mousePos;
+                mTempBody->setVelocity(mass/100 * delta.x, mass/100 * delta.y);
+                mPlanetArray.push_back(*mTempBody);
+                mTempBody = nullptr;
+
+            }
+
+        }
+
+
+        // Drawing the velocity vector for a new body
+        if (sf::Mouse::isButtonPressed(sf::Mouse::Left)
+            and mTempBody)
+	    {
+            auto pos = mTempBody->getPosition();
+            auto mousePos = mLinkedWindow->mapPixelToCoords(sf::Mouse::getPosition(*mLinkedWindow));
+            auto delta = pos - mousePos;
+            mSpeedVector[0] = sf::Vertex(pos, sf::Color::Red);
+		    mSpeedVector[1] = sf::Vertex(pos + delta, sf::Color::Red);
+
+        }
+
+
+    }
+
 
     void Sim::addCelestialBody(Body &b)
     {
@@ -71,31 +147,7 @@ namespace Celestial
 	    }
     }
 
-    void Sim::update(sf::Time dt)
-    {
-        if(isRunning())
-        {
-            // Collisions are calculated first
-            handleCollisions();
 
-            for (size_t i(0) ; i < mPlanetArray.size(); i++)
-            {
-                mPlanetArray[i].resetForce();
-                //Note: 2 loops --> N^2 complexity
-                for (size_t j(0) ; j < mPlanetArray.size(); j++)
-                {
-                    if (i != j)
-                        mPlanetArray[i].addForce(mPlanetArray[j]);
-                }
-            }
-
-            //Then, loop again and update the bodies using timestep dt
-            for (int i = 0; i < mPlanetArray.size(); i++)
-            {
-                mPlanetArray[i].update(dt);
-            }
-        }
-    }
 
 
     bool Sim::isRunning() const
@@ -168,8 +220,8 @@ namespace Celestial
 
     		for(size_t i(0); i < amount; i++)
     		{
-                Body Q(   pos.x + 2 * cos(angle) * std::cbrt(radius)
-                        , pos.y + 2 * sin(angle) * std::cbrt(radius)
+                Body Q(   pos.x + 3 * cos(angle) * std::cbrt(radius)
+                        , pos.y + 3 * sin(angle) * std::cbrt(radius)
                         , vel.x + std::sqrt(mass) * cos(angle) * CONSTANT::ROCHE_LIMIT_SPEED_MULTIPLIER
                         , vel.y + std::sqrt(mass) * sin(angle) * CONSTANT::ROCHE_LIMIT_SPEED_MULTIPLIER
                         , mass/amount);
@@ -192,6 +244,12 @@ namespace Celestial
         for(auto& b : mPlanetArray)
         {
             mLinkedWindow->draw(b);
+        }
+
+        if(mouseHeldDown and mTempBody)
+        {
+            mLinkedWindow->draw(mSpeedVector, 2, sf::Lines);
+            mLinkedWindow->draw(*mTempBody);
         }
     }
 

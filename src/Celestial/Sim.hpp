@@ -32,11 +32,12 @@ namespace Celestial
         Sim(sf::RenderWindow& window);
 
         // Methods
+        void    update(sf::Time dt);
+        void    handleEvent(const sf::Event& event);
+
         void    addCelestialBody(Body& b);
         void    removeCelestialBody(const unsigned& ind);
-        void    handleEvent(const sf::Event& event);
         void    populate(size_t number, int center_x, int center_y, int radius);
-        void    update(sf::Time dt);
 
         bool    isRunning() const;
         void    run();
@@ -52,11 +53,15 @@ namespace Celestial
 
     private:
 
+        sf::RenderWindow*   mLinkedWindow;
+        Container           mPlanetArray;
+
         bool                mIsRunning;
         bool                mouseHeldDown;
 
-        sf::RenderWindow*   mLinkedWindow;
-        Container           mPlanetArray;
+        // Temporary celestial Body
+        Body::Ptr           mTempBody;
+        sf::Vertex          mSpeedVector[2];          
 
     };
 
