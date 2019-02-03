@@ -44,10 +44,11 @@ private:
     float                   zoom;
     sf::View                view;
 
+    // Temporary Text and font
+    sf::Text                mStats;
+    sf::Text                mControls;
+    sf::Font                mFont;
+
 };
-
-
-
-
 
 #endif // CORE_HPP

@@ -12,6 +12,9 @@ namespace Celestial
     Sim::Sim(sf::RenderWindow& window)
     : mLinkedWindow(&window)
     , mPlanetArray()
+    , mBodyCount(0)
+    , mTotalMass(0)
+    , mSimulationStep(0)
     , mIsRunning(false)
     , mouseHeldDown(false)
     , mTempBody(nullptr)
@@ -22,16 +25,16 @@ namespace Celestial
 
     void Sim::update(sf::Time dt)
     {
-        if(isRunning())
+        if(isRunning() and !mPlanetArray.empty())
         {
             // Collisions are calculated first
             handleCollisions();
 
-            for (size_t i(0) ; i < mPlanetArray.size(); i++)
+            for (size_t i(0) ; i < mPlanetArray.size(); ++i)
             {
                 mPlanetArray[i].resetForce();
                 //Note: 2 loops --> N^2 complexity
-                for (size_t j(0) ; j < mPlanetArray.size(); j++)
+                for (size_t j(0) ; j < mPlanetArray.size(); ++j)
                 {
                     if (i != j)
                         mPlanetArray[i].addForce(mPlanetArray[j]);
@@ -39,11 +42,17 @@ namespace Celestial
             }
 
             //Then, loop again and update the bodies using timestep dt
-            for (int i = 0; i < mPlanetArray.size(); i++)
+            for (int i = 0; i < mPlanetArray.size(); ++i)
             {
                 mPlanetArray[i].update(dt);
             }
+
+            // incrementing the simulation step
+            ++mSimulationStep;
+
         }
+
+
 
     }
 
@@ -69,7 +78,7 @@ namespace Celestial
                 double mass = mTempBody->getMass();
                 auto delta = mTempBody->getPosition() - mousePos;
                 mTempBody->setVelocity(mass/100 * delta.x, mass/100 * delta.y);
-                mPlanetArray.push_back(*mTempBody);
+                addCelestialBody(*mTempBody);
                 mTempBody = nullptr;
 
             }
@@ -95,12 +104,27 @@ namespace Celestial
 
     void Sim::addCelestialBody(Body &b)
     {
+        ++mBodyCount;
+        mTotalMass += b.getMass();
+
         mPlanetArray.push_back(std::move(b));
+    }
+
+    void Sim::addCelestialBody(double x, double y, double vel_x, double vel_y, double mass)
+    {
+        ++mBodyCount;
+        mTotalMass += mass;
+
+        mPlanetArray.emplace_back(x, y, vel_x, vel_y, mass);
     }
 
     void Sim::removeCelestialBody(const unsigned& ind)
     {
         auto it = mPlanetArray.begin() + ind;
+
+        --mBodyCount;
+        mTotalMass -= it->getMass();
+
 	    *it = std::move(mPlanetArray.back());
 	    mPlanetArray.pop_back();
     }
@@ -109,7 +133,7 @@ namespace Celestial
     {
         mPlanetArray.clear();
 
-        mPlanetArray.emplace_back(center_x, center_y, 0, 0, 150);
+        addCelestialBody(center_x, center_y, 0, 0, 150);
         auto offset = mPlanetArray.back().getRadius() + 50;
 
         std::mt19937 generator;
@@ -123,7 +147,7 @@ namespace Celestial
         sf::Vector2d vel;
 
 
-        for (size_t i(0); i < number-1; i++)
+        for (size_t i(0); i < number-1; ++i)
 	    {
             vel = sf::Vector2d(0,0);
             angle = angleDistribution(generator);
@@ -143,7 +167,7 @@ namespace Celestial
                 vel.y *= 2000/ radius * (1 - norm/radius);
             }
 
-		    mPlanetArray.emplace_back(x, y, vel.x, vel.y, massDistribution(generator));
+		    addCelestialBody(x, y, vel.x, vel.y, massDistribution(generator));
 	    }
     }
 
@@ -165,6 +189,34 @@ namespace Celestial
         mIsRunning = false;
     }
 
+    void Sim::reset()
+    {
+        mPlanetArray.clear();
+        mTempBody.reset();
+
+        // resetting the counters
+        mTotalMass = 0;
+        mBodyCount = 0;
+        mSimulationStep = 0;
+    }
+
+////////// Getters
+
+    unsigned Sim::getBodyCount() const
+    {
+        return mBodyCount;
+    }
+
+    double Sim::getTotalMass() const
+    {
+        return mTotalMass;
+    }
+
+    unsigned long long Sim::getSimulationStep() const
+    {
+        return mSimulationStep;
+    }
+
 ////////// Internal Handling
 
     void Sim::handleCollisions()
@@ -172,37 +224,41 @@ namespace Celestial
         Body* a(nullptr);
         Body* b(nullptr);
 
-        for(size_t first(0) ; first < mPlanetArray.size() ; first++)
+        // Well, there can be only collisions between at least 2 entities
+        if(mPlanetArray.size() > 1)
         {
-            a = &mPlanetArray[first];
-            for(size_t second(0) ; second < mPlanetArray.size() ; second++)
+            for(size_t first(0) ; first < mPlanetArray.size() ; ++first)
             {
-                if(first != second)
+                a = &mPlanetArray[first];
+                for(size_t second(0) ; second < mPlanetArray.size() ; ++second)
                 {
-                    b = &mPlanetArray[second];
-
-                    // roche Limit dislocation
-                    if(a->isInsideRocheLimitOf(*b))
+                    if(first != second)
                     {
-                        explodePlanet(first);
-                        break; // we exit the loop as the planet doenst really exist anymore
+                        b = &mPlanetArray[second];
+
+                        // roche Limit dislocation
+                        if(a->isInsideRocheLimitOf(*b))
+                        {
+                            explodePlanet(first);
+                            break; // we exit the loop as the planet doenst really exist anymore
+                        }
+                        else if( (*a) != (*b) and a->hasCollidedWith(*b))
+                        {
+                            // Add the resulting fused Body.
+                            auto fusion = ((*a) + (*b));
+                            addCelestialBody(fusion);
+
+                            //erase the two collided planets.
+                            removeCelestialBody(second);
+                            removeCelestialBody(first);
+
+                            break; // we exit the loop as we only update 1 collision
+                        }
+
                     }
-                    else if( (*a) != (*b) and a->hasCollidedWith(*b))
-                    {
-                        // Add the resulting fused Body.
-                        mPlanetArray.push_back((*a) + (*b));
-
-                        //erase the two collided planets.
-                        removeCelestialBody(second);
-                        removeCelestialBody(first);
-
-                        break; // we exit the loop as we only update 1 collision
-                    }
-
                 }
             }
         }
-
     }
 
     void Sim::explodePlanet(const int& ind)
@@ -218,7 +274,7 @@ namespace Celestial
 
     		double angle = 0;
 
-    		for(size_t i(0); i < amount; i++)
+    		for(size_t i(0); i < amount; ++i)
     		{
                 Body Q(   pos.x + 3 * cos(angle) * std::cbrt(radius)
                         , pos.y + 3 * sin(angle) * std::cbrt(radius)

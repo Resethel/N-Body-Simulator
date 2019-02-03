@@ -20,6 +20,30 @@ Core::Core()
 {
     mMainWindow.setFramerateLimit(60);
     mSimulator.stop();
+
+    if(!mFont.loadFromFile("media/Sansation.ttf"))
+        throw std::runtime_error("unable to load mFont");
+
+    mStats.setFont(mFont);
+    mStats.setCharacterSize(24);
+    mStats.setString("Step:\nTimestep:\nTotal mass:\nBodies:\nZoom:");
+    mStats.setPosition(15,10);
+
+    mControls = mStats;
+    mControls.setPosition(15, 10 + mStats.getGlobalBounds().height + 50);
+    std::string str;
+
+    str = "Controls:\n";
+    str += "Toggle Simulation (Space)\n";
+    str += "Reset (R)\n";
+    str += "Increase Time Multiplier (Up)\n";
+    str += "Decrease Time Multiplier (Down)\n";
+    str += "Add Celestial Body (Hold Shift + Click & Drag)\n";
+    str += "Move view (Hold CTRL + Click & Drag)\n";
+    str += "Zoom (Scroll Mouse)\n";
+    str += "Hide Help (H)\n";
+
+    mControls.setString(str);
 }
 
 
@@ -65,6 +89,13 @@ void Core::run()
 void Core::update(sf::Time dt)
 {
     mSimulator.update(dt);
+
+    // Updating the Statistics
+    mStats.setString("Step: " + std::to_string(mSimulator.getSimulationStep()) + "\n");
+    mStats.setString(mStats.getString() + "Timestep: " + std::to_string(mTimeStepMultiplier) + "\n" );
+    mStats.setString(mStats.getString() + "Total mass: " + std::to_string(mSimulator.getTotalMass()) + "\n");
+    mStats.setString(mStats.getString() + "Bodies: " + std::to_string(mSimulator.getBodyCount()) + "\n");
+    mStats.setString(mStats.getString() + "Zoom: " + std::to_string(zoom));
 }
 
 void Core::processInput()
@@ -97,6 +128,17 @@ void Core::processInput()
 
                 case sf::Keyboard::Down:
                     mTimeStepMultiplier = utils::clamp<float>(mTimeStepMultiplier-0.5f, 0.5, 100);
+                break;
+
+                case sf::Keyboard::R:
+                    mSimulator.reset();
+                break;
+
+                case sf::Keyboard::H:
+                    if(mControls.getFillColor() == sf::Color::Transparent)
+                        mControls.setFillColor(sf::Color::White);
+                    else
+                        mControls.setFillColor(sf::Color::Transparent);
                 break;
 
                 default:
@@ -164,8 +206,6 @@ void Core::processInput()
                 view.setCenter(view.getCenter() + deltaPos);
                 mMainWindow.setView(view);
 
-
-
             }
         }
 
@@ -179,6 +219,13 @@ void Core::render()
     mMainWindow.clear(sf::Color(10, 10, 10));
 
     mSimulator.render();
+
+    sf::View v;
+    v = mMainWindow.getView();
+    mMainWindow.setView(mMainWindow.getDefaultView());
+    mMainWindow.draw(mStats);
+    mMainWindow.draw(mControls);
+    mMainWindow.setView(v);
     // End of the current frame
     mMainWindow.display();
 }

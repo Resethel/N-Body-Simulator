@@ -200,10 +200,10 @@ namespace Celestial
 
     bool Body::operator==(const Body& rhs)
     {
-        return (getPosition() == rhs.getPosition() and
-                mMass == rhs.mMass and
-                mDensity == rhs.mDensity and
-                mVelocity == rhs.mVelocity);
+        return (getPosition() == rhs.getPosition()
+                and mMass == rhs.mMass
+                and mDensity == rhs.mDensity
+                and mVelocity == rhs.mVelocity);
     }
     bool Body::operator!=(const Body& rhs)
     {

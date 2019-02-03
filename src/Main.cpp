@@ -26,9 +26,13 @@ int main(int argc, char** argv)
         Core core;
         core.run();
     }
+    catch(std::runtime_error& r)
+    {
+        std::cerr << "RUNTIME ERROR: " << r.what() << std::endl;
+    }
     catch(std::exception& e)
     {
-        std::cerr << e.what() << std::endl;
+        std::cerr << "EXCEPTION: " << e.what() << std::endl;
         return EXIT_FAILURE;
 
     }
