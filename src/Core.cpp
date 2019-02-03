@@ -191,9 +191,9 @@ void Core::processInput()
 
                 // Determine the scroll direction and adjust the zoom level
                 if (event.mouseWheelScroll.delta <= -1)
-                    zoom = std::min(50.f, zoom + .1f);
+                    zoom = std::min(5.f, zoom + .05f);
                 else if (event.mouseWheelScroll.delta >= 1)
-                    zoom = std::max(.5f, zoom - .1f);
+                    zoom = std::max(.1f, zoom - .05f);
 
                 // Update our view
                 view.setSize(mMainWindow.getDefaultView().getSize()); // Reset the size
