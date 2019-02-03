@@ -10,6 +10,7 @@
 namespace CONSTANT
 {
     // Gravitational Constant
+    const double REAL_G = 6.673e-11;
     const double G = 6.673e1;
 
     // BODY_TYPE_MASS

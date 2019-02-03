@@ -108,6 +108,17 @@ namespace Celestial
         mBody.setFillColor(color);
     }
 
+    void Body::setVelocity(const double& vx, const double& vy)
+    {
+        mVelocity.x = vx;
+        mVelocity.y = vy;
+    }
+
+    void Body::setVelocity(const sf::Vector2d& vel)
+    {
+        setVelocity(vel.x,vel.y);
+    }
+
 //////// Static
 
     double Body::rocheLimit(const Body &Primary, const Body &Secondary)
@@ -189,10 +200,10 @@ namespace Celestial
 
     bool Body::operator==(const Body& rhs)
     {
-        return (getPosition() == rhs.getPosition() and
-                mMass == rhs.mMass and
-                mDensity == rhs.mDensity and
-                mVelocity == rhs.mVelocity);
+        return (getPosition() == rhs.getPosition()
+                and mMass == rhs.mMass
+                and mDensity == rhs.mDensity
+                and mVelocity == rhs.mVelocity);
     }
     bool Body::operator!=(const Body& rhs)
     {

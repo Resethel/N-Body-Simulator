@@ -37,6 +37,18 @@ namespace utils
    }
 
    template <typename T>
+   inline T distance(sf::Vector2<T> A, sf::Vector2<T> B)
+   {
+       return std::sqrt(pow(B.x - A.x, 2) + pow(B.y - A.y,2));
+   }
+
+   template <typename T>
+   inline T distance(T Ax, T Ay, T Bx, T By)
+   {
+       return std::sqrt(pow(Bx - Ax, 2) + pow(By - Ay,2));
+   }
+
+   template <typename T>
    inline T normalize(const T& vector)
    {
        auto norm = std::sqrt(vector.x * vector.x + vector.y * vector.y);
