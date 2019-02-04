@@ -3,6 +3,7 @@
 // N-Body-Simulator
 //
 
+#include "../config.h" // To be used later on
 #include <exception>
 #include <iostream>
 #include <random>
