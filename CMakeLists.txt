@@ -6,7 +6,7 @@ project (N-Body-Simulator)
 # The version number.
 set (N-Body-Simulator_VERSION_MAJOR 0)
 set (N-Body-Simulator_VERSION_MINOR 1)
-set (N-Body-Simulator_VERSION_PATCH 0)
+set (N-Body-Simulator_VERSION_PATCH 1)
 
 
 configure_file(
