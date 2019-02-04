@@ -27,9 +27,10 @@ namespace Celestial
     {
         if(isRunning() and !mPlanetArray.empty())
         {
-            // Collisions are calculated first
-            handleCollisions();
-
+            // A thread handling collisions
+            std::thread collisions_thread(&Sim::handleCollisions, this);
+            
+            // Updating the forces
             for (size_t i(0) ; i < mPlanetArray.size(); ++i)
             {
                 mPlanetArray[i].resetForce();
@@ -40,6 +41,8 @@ namespace Celestial
                         mPlanetArray[i].addForce(mPlanetArray[j]);
                 }
             }
+
+            collisions_thread.join();
 
             //Then, loop again and update the bodies using timestep dt
             for (int i = 0; i < mPlanetArray.size(); ++i)

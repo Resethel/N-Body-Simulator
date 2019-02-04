@@ -8,6 +8,7 @@
 
 #include <random>
 #include <vector>
+#include <thread>
 
 #include <SFML/Graphics.hpp>
 #include <SFML/System/Time.hpp>
