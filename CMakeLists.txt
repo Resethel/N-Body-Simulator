@@ -42,6 +42,9 @@ add_executable(
     src/Celestial/Body.cpp
     src/Celestial/Sim.hpp
     src/Celestial/Sim.cpp
+
+    src/GFX/Effect.hpp
+    src/GFX/Effect.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} ${SFML_LIBRARIES} ${SFML_DEPENDENCIES} ${ADDITIONAL_LINK_FLAGS})
