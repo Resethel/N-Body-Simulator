@@ -31,6 +31,8 @@ namespace gfx
         // Methods
         void    pushNewPoint(const sf::Vector2f& point);
 
+        void    clear();
+
         // Setters
         void    setMaxPoints(const unsigned& pts);
 

@@ -19,6 +19,7 @@ namespace Celestial
     , mouseHeldDown(false)
     , mTempBody(nullptr)
     , mSpeedVector()
+    , mTrailedBody(nullptr)
     {}
 
 ////////// Methods
@@ -29,7 +30,7 @@ namespace Celestial
         {
             // A thread handling collisions
             std::thread collisions_thread(&Sim::handleCollisions, this);
-            
+
             // Updating the forces
             for (size_t i(0) ; i < mPlanetArray.size(); ++i)
             {
@@ -49,7 +50,29 @@ namespace Celestial
             {
                 mPlanetArray[i].update(dt);
             }
+/*
+            if(mTrailedBody)
+            {
+                if(mPlanetArray.empty())
+                {
 
+                    mTrailedBody = nullptr;
+                }
+                else if(*mTrailedBody == mPlanetArray[0])
+                {
+                    mTrail.pushNewPoint(mTrailedBody->getPosition());
+                }
+                else
+                {
+                    mTrail.clear();
+                    mTrailedBody = &mPlanetArray[0];
+                }
+            }
+            else if(!mPlanetArray.empty())
+            {
+                mTrailedBody = &mPlanetArray[0];
+            }
+*/
             // incrementing the simulation step
             ++mSimulationStep;
 
@@ -300,6 +323,9 @@ namespace Celestial
 
     void Sim::render() const
     {
+        if(mTrailedBody)
+            mLinkedWindow->draw(mTrail);
+
         for(auto& b : mPlanetArray)
         {
             mLinkedWindow->draw(b);

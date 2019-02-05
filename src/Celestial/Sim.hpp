@@ -17,6 +17,8 @@
 #include "../Utils.hpp"
 #include "Body.hpp"
 
+#include "../GFX/Trail.hpp"
+
 namespace Celestial
 {
 
@@ -77,6 +79,10 @@ namespace Celestial
         // Temporary celestial Body
         Body::Ptr           mTempBody;
         sf::Vertex          mSpeedVector[2];
+
+        // Test Trail
+        gfx::Trail          mTrail;
+        Body*               mTrailedBody;
 
     };
 

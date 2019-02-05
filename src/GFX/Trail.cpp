@@ -11,57 +11,70 @@ namespace gfx
 
 ////////// Constructor & Destructor
 
-        Trail::Trail()
-        : Effect()
-        , mMaxPoints(200)
-        , mThickness(1)
-        , mPoints()
-        , mVertices()
+    Trail::Trail()
+    : Effect()
+    , mMaxPoints(200)
+    , mThickness(1)
+    , mPoints()
+    , mVertices()
 
-        {
-            mVertices.setPrimitiveType(sf::PrimitiveType::TriangleStrip);
-        }
+    {
+        mVertices.setPrimitiveType(sf::PrimitiveType::TriangleStrip);
+    }
 
 ////////// Methods
 
-        void Trail::pushNewPoint(const sf::Vector2f& point)
+    void Trail::pushNewPoint(const sf::Vector2f& point)
+    {
+        if (mPoints.size() == mMaxPoints)
+        mPoints.pop_back();
+
+        mPoints.push_front(point);
+
+        sf::Vector2f pos(0,0), pos_p(0,0);
+        sf::Vertex   v_left, v_right;
+        double  angle;
+        // Drawing the trail from the last to the first
+        if(mPoints.size() > 1)
         {
-            if (mPoints.size() == mMaxPoints)
-                mPoints.pop_back();
+            mVertices.clear();
 
-            mPoints.push_front(point);
-
-            sf::Vector2f pos;
-            sf::Vertex   v_left, v_right;
-            // Drawing the trail from the last to the first
-            if(mPoints.size() > 1)
+            for(size_t i(0) ; i < mPoints.size() ; ++i)
             {
-                mVertices.clear();
+                pos = mPoints[i];
+                if(i > 0)
+                pos_p = mPoints[i-1];
 
-                for(size_t i(0) ; i < mPoints.size() ; ++i)
-                {
-                    pos = mPoints[i];
+                angle = M_PI/2.f - atan((pos.y-pos_p.y)/(pos.x-pos_p.x));
 
-                    v_left.position  = sf::Vector2f(pos.x - mThickness/2.f, pos.y);
-                    v_right.position = sf::Vector2f(pos.x + mThickness/2.f, pos.y);
+                v_left.position  = sf::Vector2f(pos.x + mThickness/2.f * cos(angle), pos.y - mThickness/2.f * sin(angle));
+                v_right.position = sf::Vector2f(pos.x - mThickness/2.f * cos(angle), pos.y + mThickness/2.f * sin(angle));
 
-                    v_left.color  = getColor();
-                    v_right.color = getColor();
+                v_left.color  = getColor();
+                v_right.color = getColor();
 
-                    mVertices.append(v_left);
-                    mVertices.append(v_right);
-                }
-
+                mVertices.append(v_left);
+                mVertices.append(v_right);
             }
 
         }
 
+    }
+
+
+    void Trail::clear()
+    {
+        mPoints.clear();
+        mVertices.clear();
+    }
+
+
 ////////// Setters
 
-        void Trail::setMaxPoints(const unsigned& pts)
-        {
-            mMaxPoints = pts;
-        }
+    void Trail::setMaxPoints(const unsigned& pts)
+    {
+        mMaxPoints = pts;
+    }
 
 ////////// Draw
 
