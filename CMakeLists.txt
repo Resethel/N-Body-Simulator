@@ -5,7 +5,7 @@ set (CMAKE_BUILD_TYPE Release)
 # The version number.
 set (N-Body-Simulator_VERSION_MAJOR 0)
 set (N-Body-Simulator_VERSION_MINOR 1)
-set (N-Body-Simulator_VERSION_PATCH 1)
+set (N-Body-Simulator_VERSION_PATCH 2)
 
 #
 set (CMAKE_CXX_STANDARD 14)
