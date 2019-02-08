@@ -35,7 +35,6 @@ namespace Celestial
 
         double  distanceTo(const Body& body) const;
         void    addForce(const Body& body);
-        Body    fuseWith(Body& otherBody);
         bool    hasCollidedWith(const Body& body) const;
         void    resetForce();
         void    updateVelocity(const Body& b, sf::Time dt);
