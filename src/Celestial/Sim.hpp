@@ -57,7 +57,7 @@ namespace Celestial
 
     protected:
         // Internal handling
-        void    handleCollisions();
+        void    physicalResolution();
 
     private:
 

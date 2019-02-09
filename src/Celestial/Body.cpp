@@ -52,7 +52,7 @@ namespace Celestial
         double dy = body.getPosition().y - getPosition().y;
         double dist = std::sqrt(dx*dx + dy*dy);
 
-        if(dist >= 10*std::numeric_limits<double>().epsilon())
+        if(dist >= CONSTANT::MIN_DISTANCE_FOR_CALCULATION)
         {
             double F = (CONSTANT::G * this->mMass * body.getMass()) / (dist*dist);
 

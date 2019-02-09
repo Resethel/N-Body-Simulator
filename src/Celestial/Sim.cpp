@@ -27,22 +27,8 @@ namespace Celestial
     {
         if(isRunning() and !mPlanetArray.empty())
         {
-            // A thread handling collisions
-            std::thread collisions_thread(&Sim::handleCollisions, this);
-            
-            // Updating the forces
-            for (size_t i(0) ; i < mPlanetArray.size(); ++i)
-            {
-                mPlanetArray[i].resetForce();
-                //Note: 2 loops --> N^2 complexity
-                for (size_t j(0) ; j < mPlanetArray.size(); ++j)
-                {
-                    if (i != j)
-                        mPlanetArray[i].addForce(mPlanetArray[j]);
-                }
-            }
-
-            collisions_thread.join();
+            // Handling collisions, roche limit and force update
+            physicalResolution();
 
             //Then, loop again and update the bodies using timestep dt
             for (int i = 0; i < mPlanetArray.size(); ++i)
@@ -222,7 +208,7 @@ namespace Celestial
 
 ////////// Internal Handling
 
-    void Sim::handleCollisions()
+    void Sim::physicalResolution()
     {
         Body* a(nullptr);
         Body* b(nullptr);
@@ -233,18 +219,21 @@ namespace Celestial
             for(size_t first(0) ; first < mPlanetArray.size() ; ++first)
             {
                 a = &mPlanetArray[first];
+                a->resetForce();
+
                 for(size_t second(0) ; second < mPlanetArray.size() ; ++second)
                 {
                     if(first != second)
                     {
                         b = &mPlanetArray[second];
 
-                        // roche Limit dislocation
+                        // Check for Roche Limit Dislocation
                         if(a->isInsideRocheLimitOf(*b))
                         {
                             explodePlanet(first);
                             break; // we exit the loop as the planet doenst really exist anymore
                         }
+                        // Check for collision
                         else if( (*a) != (*b) and a->hasCollidedWith(*b))
                         {
                             // Add the resulting fused Body.
@@ -256,6 +245,11 @@ namespace Celestial
                             removeCelestialBody(first);
 
                             break; // we exit the loop as we only update 1 collision
+                        }
+                        // Update forces
+                        else
+                        {
+                            a->addForce(*b);
                         }
 
                     }
@@ -279,8 +273,8 @@ namespace Celestial
 
     		for(size_t i(0); i < amount; ++i)
     		{
-                Body Q(   pos.x + 3 * cos(angle) * std::cbrt(radius)
-                        , pos.y + 3 * sin(angle) * std::cbrt(radius)
+                Body Q(   pos.x + 3 * cos(angle)  * std::cbrt(radius)
+                        , pos.y + 3 * sin(angle)  * std::cbrt(radius)
                         , vel.x + std::sqrt(mass) * cos(angle) * CONSTANT::ROCHE_LIMIT_SPEED_MULTIPLIER
                         , vel.y + std::sqrt(mass) * sin(angle) * CONSTANT::ROCHE_LIMIT_SPEED_MULTIPLIER
                         , mass/amount);
