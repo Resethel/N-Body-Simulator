@@ -6,12 +6,18 @@
 #ifndef CONSTANT_HPP
 #define CONSTANT_HPP
 
+#include <limits>
+
 
 namespace CONSTANT
 {
     // Gravitational Constant
     const double REAL_G = 6.673e-11;
     const double G = 6.673e1;
+
+    // Calculation constants
+
+    const double MIN_DISTANCE_FOR_CALCULATION = 10 * std::numeric_limits<double>().epsilon();
 
     // BODY_TYPE_MASS
     const double ROCKY_LIMIT = 15;

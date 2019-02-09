@@ -48,14 +48,17 @@ namespace Celestial
 
     void Body::addForce(const Body& body)
     {
-        double EPS = 1; // softening parameter (just to avoid infinities)
         double dx = body.getPosition().x - getPosition().x;
         double dy = body.getPosition().y - getPosition().y;
         double dist = std::sqrt(dx*dx + dy*dy);
-        double F = (CONSTANT::G * this->mMass * body.getMass()) / (dist*dist + EPS*EPS);
 
-        mForce.x += F * dx / dist;
-        mForce.y += F * dy / dist;
+        if(dist >= CONSTANT::MIN_DISTANCE_FOR_CALCULATION)
+        {
+            double F = (CONSTANT::G * this->mMass * body.getMass()) / (dist*dist);
+
+            mForce.x += F * dx / dist;
+            mForce.y += F * dy / dist;
+        }
 
     }
 
