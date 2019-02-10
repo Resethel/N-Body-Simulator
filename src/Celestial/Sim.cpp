@@ -165,9 +165,9 @@ namespace Celestial
 	    }
     }
 
-    void Sim::addExplosion(const sf::Vector2f& pos)
+    void Sim::addExplosion(gfx::Explosion& expl)
     {
-        mExplosionArray.emplace_back(pos.x, pos.y);
+        mExplosionArray.push_back(std::move(expl));
     }
 
     void Sim::removeExplosion(const size_t& ind)
@@ -245,7 +245,8 @@ namespace Celestial
                         // Check for Roche Limit Dislocation
                         if(a->isInsideRocheLimitOf(*b))
                         {
-                            addExplosion(a->getPosition());
+                            gfx::Explosion expl(a->getPosition());
+                            addExplosion(expl);
                             dislocateBody(first);
                             break; // we exit the loop as the planet doenst really exist anymore
                         }
@@ -256,10 +257,13 @@ namespace Celestial
                             auto fusion = ((*a) + (*b));
 
                             // Add an explosion at impact
-                            if(a->getMass() < b->getMass())
-                                addExplosion(a->getPosition());
-                            else
-                                addExplosion(b->getPosition());
+                            gfx::Explosion expl(a->getPosition());
+                            if(b->getMass() < a->getMass())
+                            {
+                                expl.setPosition(b->getPosition());
+                            }
+
+                            addExplosion(expl);
 
                             // Add the fused body to the simulation
                             addCelestialBody(fusion);

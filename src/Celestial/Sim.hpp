@@ -43,7 +43,7 @@ namespace Celestial
         void    removeCelestialBody(const size_t& ind);
         void    populate(size_t number, int center_x, int center_y, int radius);
 
-        void    addExplosion(const sf::Vector2f& pos);
+        void    addExplosion(gfx::Explosion& expl);
         void    removeExplosion(const size_t& ind);
 
         bool    isRunning() const;

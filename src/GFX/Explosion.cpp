@@ -9,23 +9,27 @@ namespace gfx
 {
 
 
+////////// Constructors
 
     Explosion::Explosion(double x, double y, unsigned duration, float intensity)
     : Effect(x,y,0,sf::Color::Yellow)
     , mIntensity(intensity)
     , mDuration(duration)
-    , mStep(0)
     {
         // initial parameter
         mBody.setPrimitiveType(sf::TriangleFan);
     }
+
+    Explosion::Explosion(sf::Vector2f pos, unsigned duration, float intensity)
+    : Explosion(pos.x, pos.y, duration, intensity)
+    {}
 
 
 ////////// Methods
 
     void Explosion::update()
     {
-        if(!mFinished and mStep < mDuration)
+        if((!mFinished) and (mStep < mDuration))
         {
             mBody.clear();
             sf::Vertex vertex;
@@ -56,12 +60,13 @@ namespace gfx
                 mBody.append(vertex);
             }
 
-            ++mStep;
         }
         else if(!mFinished)
         {
             mFinished = true;
         }
+
+        Effect::update();
 
 
 

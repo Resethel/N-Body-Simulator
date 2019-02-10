@@ -25,9 +25,10 @@ namespace gfx
 
         // Constructors
         Explosion(double x, double y, unsigned duration = 10, float intensity = 1);
+        Explosion(sf::Vector2f pos, unsigned duration = 10, float intensity = 1);
 
         // Methods
-        void update();
+        virtual void update();
 
         bool    isFinished() const;
 
@@ -45,8 +46,7 @@ namespace gfx
     private:
 
         float       mIntensity;
-        unsigned    mDuration; // in frames
-        unsigned    mStep;
+        unsigned    mDuration; // in steps
         bool        mFinished;
 
         sf::VertexArray mBody;
