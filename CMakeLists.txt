@@ -45,8 +45,8 @@ add_executable(
 
     src/GFX/Effect.hpp
     src/GFX/Effect.cpp
-    src/GFX/Trail.hpp
-    src/GFX/Trail.cpp
+    src/GFX/Explosion.hpp
+    src/GFX/Explosion.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} ${SFML_LIBRARIES} ${SFML_DEPENDENCIES} ${ADDITIONAL_LINK_FLAGS})

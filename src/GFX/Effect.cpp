@@ -11,11 +11,23 @@ namespace gfx
 
 ////////// Constructor & Destructor
 
-    Effect::Effect()
-    : mColor(sf::Color::White)
-    , mSize(0)
+    Effect::Effect(double x, double y, double s, sf::Color col)
+    : mColor(col)
+    , mPosition(x,y)
+    , mSize(s)
+    , mStep(0)
     {}
 
+    Effect::Effect()
+    : Effect(0,0,0,sf::Color::White)
+    {}
+
+////////// Methods
+
+    void Effect::update()
+    {
+        ++mStep;
+    }
 
 ////////// Getters
 
@@ -32,6 +44,11 @@ namespace gfx
     double Effect::getSize() const
     {
         return mSize;
+    }
+
+    unsigned Effect::getStepCount() const
+    {
+        return mStep;
     }
 
     double Effect::getX() const
@@ -60,6 +77,11 @@ namespace gfx
     void Effect::setPosition(const sf::Vector2d& p)
     {
         mPosition = p;
+    }
+
+    void Effect::setPosition(const sf::Vector2f& p)
+    {
+        setPosition(p.x, p.y);
     }
 
 

@@ -16,12 +16,18 @@ namespace gfx
     {
     public:
 
+        Effect(double x, double y, double s = 0, sf::Color col = sf::Color::White);
     	Effect();
+
+        // Methods
+
+        virtual void update();
 
         // Getters
         sf::Color       getColor() const;
         sf::Vector2d    getPosition() const;
         double          getSize() const;
+        unsigned        getStepCount() const;
 
         double          getX() const;
         double          getY() const;
@@ -30,17 +36,19 @@ namespace gfx
         void    setColor(const sf::Color& c);
         void    setPosition(const double& x, const double& y);
         void    setPosition(const sf::Vector2d& p);
+        void    setPosition(const sf::Vector2f& p);
         void    setSize(const double& s);
 
     private:
 
         virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const =0;
 
-    private:
+    protected:
 
         sf::Color       mColor;
         sf::Vector2d    mPosition;
         double          mSize;
+        unsigned        mStep;
 
 
 
