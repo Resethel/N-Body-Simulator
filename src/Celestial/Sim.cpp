@@ -28,13 +28,20 @@ namespace Celestial
         if(isRunning() and !mPlanetArray.empty())
         {
             // Handling collisions, roche limit and force update
-            physicalResolution();
+            std::thread phy_res_thread(&Sim::physicalResolution, this);
 
-            //Then, loop again and update the bodies using timestep dt
-            for (int i = 0; i < mPlanetArray.size(); ++i)
+            // Handling effects
+            std::thread eff_res_thread(&Sim::effectsResolution, this);
+
+            //Updating the bodies using timestep dt
+            for (size_t i(0) ; i < mPlanetArray.size(); ++i)
             {
                 mPlanetArray[i].update(dt);
             }
+
+            //joining back the threads
+            phy_res_thread.join();
+            eff_res_thread.join();
 
             // incrementing the simulation step
             ++mSimulationStep;
@@ -44,7 +51,6 @@ namespace Celestial
 
 
     }
-
 
     void Sim::handleEvent(const sf::Event& event)
     {
@@ -90,7 +96,6 @@ namespace Celestial
 
     }
 
-
     void Sim::addCelestialBody(Body &b)
     {
         ++mBodyCount;
@@ -107,7 +112,7 @@ namespace Celestial
         mPlanetArray.emplace_back(x, y, vel_x, vel_y, mass);
     }
 
-    void Sim::removeCelestialBody(const unsigned& ind)
+    void Sim::removeCelestialBody(const size_t& ind)
     {
         auto it = mPlanetArray.begin() + ind;
 
@@ -160,8 +165,18 @@ namespace Celestial
 	    }
     }
 
+    void Sim::addExplosion(const sf::Vector2f& pos)
+    {
+        mExplosionArray.emplace_back(pos.x, pos.y);
+    }
 
+    void Sim::removeExplosion(const size_t& ind)
+    {
+        auto it = mExplosionArray.begin() + ind;
 
+	    *it = std::move(mExplosionArray.back());
+	    mExplosionArray.pop_back();
+    }
 
     bool Sim::isRunning() const
     {
@@ -230,14 +245,23 @@ namespace Celestial
                         // Check for Roche Limit Dislocation
                         if(a->isInsideRocheLimitOf(*b))
                         {
-                            explodePlanet(first);
+                            addExplosion(a->getPosition());
+                            dislocateBody(first);
                             break; // we exit the loop as the planet doenst really exist anymore
                         }
                         // Check for collision
                         else if( (*a) != (*b) and a->hasCollidedWith(*b))
                         {
-                            // Add the resulting fused Body.
+                            // Create the resulting fused Body.
                             auto fusion = ((*a) + (*b));
+
+                            // Add an explosion at impact
+                            if(a->getMass() < b->getMass())
+                                addExplosion(a->getPosition());
+                            else
+                                addExplosion(b->getPosition());
+
+                            // Add the fused body to the simulation
                             addCelestialBody(fusion);
 
                             //erase the two collided planets.
@@ -258,7 +282,24 @@ namespace Celestial
         }
     }
 
-    void Sim::explodePlanet(const int& ind)
+    void Sim::effectsResolution()
+    {
+        // EXPLOSIONS
+
+        for(size_t i(0) ; i < mExplosionArray.size() ; ++i )
+        {
+            if(mExplosionArray[i].isFinished())
+            {
+                removeExplosion(i);
+            }
+            else
+            {
+                mExplosionArray[i].update();
+            }
+        }
+    }
+
+    void Sim::dislocateBody(const int& ind)
     {
 
         if (!mPlanetArray.empty())
@@ -294,9 +335,17 @@ namespace Celestial
 
     void Sim::render() const
     {
+
+        // drawibg celestial bodies
         for(auto& b : mPlanetArray)
         {
             mLinkedWindow->draw(b);
+        }
+
+        // drawing explosions
+        for(auto& expl : mExplosionArray)
+        {
+            mLinkedWindow->draw(expl);
         }
 
         if(mouseHeldDown and mTempBody)
@@ -305,7 +354,6 @@ namespace Celestial
             mLinkedWindow->draw(*mTempBody);
         }
     }
-
 
 
 

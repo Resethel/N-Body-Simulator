@@ -34,6 +34,9 @@ namespace CONSTANT
 
     // EXPLOSIONS, BREAKING, ETC
     const double MINIMUM_MASS_FOR_DIVISION = 3;
+    const double EXPLOSION_FLASH_SIZE = 10;
+    const double EXPLOSION_LIGHT_STRENGTH = 50;
+    const size_t EXPLOSION_POINT_COUNT = 50;
 
 
 }

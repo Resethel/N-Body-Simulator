@@ -11,9 +11,14 @@ namespace gfx
 
 ////////// Constructor & Destructor
 
+    Effect::Effect(double x, double y, double s, sf::Color col)
+    : mColor(col)
+    , mPosition(x,y)
+    , mSize(s)
+    {}
+
     Effect::Effect()
-    : mColor(sf::Color::White)
-    , mSize(0)
+    : Effect(0,0,0,sf::Color::White)
     {}
 
 

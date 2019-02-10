@@ -15,6 +15,7 @@
 
 #include "../Constant.hpp"
 #include "../Utils.hpp"
+#include "../GFX/Explosion.hpp"
 #include "Body.hpp"
 
 namespace Celestial
@@ -26,7 +27,8 @@ namespace Celestial
     {
     public:
 
-        typedef std::vector<Celestial::Body> Container;
+        typedef std::vector<Celestial::Body>    BodyContainer;
+        typedef std::vector<gfx::Explosion>     ExplosionContainer;
 
     public:
         // Constructor
@@ -38,8 +40,11 @@ namespace Celestial
 
         void    addCelestialBody(Body& b);
         void    addCelestialBody(double x, double y, double vel_x, double vel_y, double mass);
-        void    removeCelestialBody(const unsigned& ind);
+        void    removeCelestialBody(const size_t& ind);
         void    populate(size_t number, int center_x, int center_y, int radius);
+
+        void    addExplosion(const sf::Vector2f& pos);
+        void    removeExplosion(const size_t& ind);
 
         bool    isRunning() const;
         void    run();
@@ -48,7 +53,7 @@ namespace Celestial
 
         void    render() const;
 
-        void    explodePlanet(const int& ind);
+
 
         // getters
         unsigned            getBodyCount() const;
@@ -58,11 +63,16 @@ namespace Celestial
     protected:
         // Internal handling
         void    physicalResolution();
+        void    effectsResolution();
+
+        void    dislocateBody(const int& ind);
 
     private:
 
         sf::RenderWindow*   mLinkedWindow;
-        Container           mPlanetArray;
+
+        BodyContainer       mPlanetArray;
+        ExplosionContainer  mExplosionArray;
 
         // Statistics
         unsigned            mBodyCount;

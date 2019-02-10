@@ -16,6 +16,7 @@ namespace gfx
     {
     public:
 
+        Effect(double x, double y, double s = 0, sf::Color col = sf::Color::White);
     	Effect();
 
         // Getters
@@ -36,7 +37,7 @@ namespace gfx
 
         virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const =0;
 
-    private:
+    protected:
 
         sf::Color       mColor;
         sf::Vector2d    mPosition;
