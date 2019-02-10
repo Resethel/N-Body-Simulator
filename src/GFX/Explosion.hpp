@@ -30,7 +30,7 @@ namespace gfx
         // Methods
         virtual void update();
 
-        bool    isFinished() const;
+
 
         // Getters
         float    getIntensity() const;
@@ -47,7 +47,6 @@ namespace gfx
 
         float       mIntensity;
         unsigned    mDuration; // in steps
-        bool        mFinished;
 
         sf::VertexArray mBody;
 

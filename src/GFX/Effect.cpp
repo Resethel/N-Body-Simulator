@@ -16,6 +16,7 @@ namespace gfx
     , mPosition(x,y)
     , mSize(s)
     , mStep(0)
+    , mDestroyed(false)
     {}
 
     Effect::Effect()
@@ -29,6 +30,10 @@ namespace gfx
         ++mStep;
     }
 
+    bool Effect::isDestroyed() const
+    {
+        return mDestroyed;
+    }
 ////////// Getters
 
     sf::Color Effect::getColor() const
@@ -88,6 +93,13 @@ namespace gfx
     void Effect::setSize(const double& s)
     {
         mSize = s;
+    }
+
+////////// Internal Handling
+
+    void Effect::destroy()
+    {
+        mDestroyed = true;
     }
 
 

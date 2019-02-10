@@ -29,7 +29,7 @@ namespace gfx
 
     void Explosion::update()
     {
-        if((!mFinished) and (mStep < mDuration))
+        if((!isDestroyed()) and (mStep < mDuration))
         {
             mBody.clear();
             sf::Vertex vertex;
@@ -61,20 +61,15 @@ namespace gfx
             }
 
         }
-        else if(!mFinished)
+        else if(!isDestroyed())
         {
-            mFinished = true;
+            destroy();
         }
 
         Effect::update();
 
 
 
-    }
-
-    bool Explosion::isFinished() const
-    {
-        return mFinished;
     }
 
 ////////// Getters

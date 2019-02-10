@@ -19,6 +19,8 @@
 namespace Celestial
 {
 
+
+
     class Body : public sf::Transformable, public sf::Drawable
     {
     public:

@@ -11,7 +11,9 @@
 
 #include <SFML/Graphics.hpp>
 
+#include "../Celestial/Body.hpp"
 #include "Effect.hpp"
+
 
 namespace gfx
 {
@@ -27,11 +29,14 @@ namespace gfx
     public:
 
     	Trail();
+        ~Trail();
 
         // Methods
-        void    pushNewPoint(const sf::Vector2f& point);
+        void            pushNewPoint(const sf::Vector2f& point);
+        void            linkTo(const Celestial::Body& body);
 
-        void    clear();
+        virtual void    update();
+        void            clear(bool unlink = false);
 
         // Setters
         void    setMaxPoints(const unsigned& pts);
@@ -49,6 +54,8 @@ namespace gfx
 
         std::deque<sf::Vector2f>    mPoints;
         sf::VertexArray             mVertices;
+
+        Celestial::Body*            mLinkedBody;
 
     };
 

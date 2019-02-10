@@ -23,6 +23,8 @@ namespace gfx
 
         virtual void update();
 
+        bool         isDestroyed() const;
+
         // Getters
         sf::Color       getColor() const;
         sf::Vector2d    getPosition() const;
@@ -39,6 +41,11 @@ namespace gfx
         void    setPosition(const sf::Vector2f& p);
         void    setSize(const double& s);
 
+    protected:
+        // Internal Handling
+        void    destroy();
+
+
     private:
 
         virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const =0;
@@ -49,6 +56,8 @@ namespace gfx
         sf::Vector2d    mPosition;
         double          mSize;
         unsigned        mStep;
+
+        bool            mDestroyed;
 
 
 

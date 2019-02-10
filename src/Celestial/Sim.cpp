@@ -43,7 +43,7 @@ namespace Celestial
             //joining back the threads
             phy_res_thread.join();
             eff_res_thread.join();
-/*
+
             if(mTrailedBody)
             {
                 if(mPlanetArray.empty())
@@ -65,7 +65,7 @@ namespace Celestial
             {
                 mTrailedBody = &mPlanetArray[0];
             }
-*/
+
 
             // incrementing the simulation step
             ++mSimulationStep;
@@ -316,7 +316,7 @@ namespace Celestial
 
         for(size_t i(0) ; i < mExplosionArray.size() ; ++i )
         {
-            if(mExplosionArray[i].isFinished())
+            if(mExplosionArray[i].isDestroyed())
             {
                 removeExplosion(i);
             }

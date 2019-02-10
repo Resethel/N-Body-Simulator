@@ -22,6 +22,11 @@ namespace gfx
         mVertices.setPrimitiveType(sf::PrimitiveType::TriangleStrip);
     }
 
+    Trail::~Trail()
+    {
+        mLinkedBody = nullptr;
+    }
+
 ////////// Methods
 
     void Trail::pushNewPoint(const sf::Vector2f& point)
@@ -47,8 +52,11 @@ namespace gfx
 
                 angle = M_PI/2.f - atan((pos.y-pos_p.y)/(pos.x-pos_p.x));
 
-                v_left.position  = sf::Vector2f(pos.x + mThickness/2.f * cos(angle), pos.y - mThickness/2.f * sin(angle));
-                v_right.position = sf::Vector2f(pos.x - mThickness/2.f * cos(angle), pos.y + mThickness/2.f * sin(angle));
+                v_left.position  = sf::Vector2f(pos.x - mThickness/2.f * cos(angle),
+                                                pos.y + mThickness/2.f * sin(angle));
+
+                v_right.position = sf::Vector2f(pos.x + mThickness/2.f * cos(angle),
+                                                pos.y - mThickness/2.f * sin(angle));
 
                 v_left.color  = getColor();
                 v_right.color = getColor();
@@ -61,11 +69,21 @@ namespace gfx
 
     }
 
+    void Trail::update()
+    {
+        if(mLinkedBody)
+            pushNewPoint(mLinkedBody->getPosition());
 
-    void Trail::clear()
+        Effect::update();
+    }
+
+    void Trail::clear(bool unlink)
     {
         mPoints.clear();
         mVertices.clear();
+
+        if(unlink)
+            mLinkedBody = nullptr;
     }
 
 
