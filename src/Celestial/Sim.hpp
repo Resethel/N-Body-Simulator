@@ -31,6 +31,7 @@ namespace Celestial
 
         typedef std::vector<Body::Ptr>      BodyContainer;
         typedef std::vector<gfx::Explosion> ExplosionContainer;
+        typedef std::vector<gfx::Trail>     TrailContainer;
 
     public:
         // Constructor
@@ -76,6 +77,9 @@ namespace Celestial
 
         BodyContainer       mPlanetArray;
         ExplosionContainer  mExplosionArray;
+
+        // trail test array
+        TrailContainer      mTrailArray;
 
         // Statistics
         unsigned            mBodyCount;

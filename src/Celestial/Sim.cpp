@@ -84,9 +84,9 @@ namespace Celestial
         {
             if(!mouseHeldDown and sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
             {
-                mouseHeldDown = true;
-                auto mousePos = mLinkedWindow->mapPixelToCoords(sf::Mouse::getPosition(*mLinkedWindow));
-                mTempBody = std::make_shared<Body>(mousePos.x, mousePos.y,0,0,50);
+                mouseHeldDown   = true;
+                auto mousePos   = mLinkedWindow->mapPixelToCoords(sf::Mouse::getPosition(*mLinkedWindow));
+                mTempBody       = std::make_shared<Body>(mousePos.x, mousePos.y,0,0,50);
             }
         }
 
@@ -95,10 +95,10 @@ namespace Celestial
         {
             if(mouseHeldDown and mTempBody)
             {
-                mouseHeldDown = false;
-                auto mousePos = mLinkedWindow->mapPixelToCoords(sf::Mouse::getPosition(*mLinkedWindow));
-                double mass = mTempBody->getMass();
-                auto delta = mTempBody->getPosition() - mousePos;
+                mouseHeldDown   = false;
+                auto mousePos   = mLinkedWindow->mapPixelToCoords(sf::Mouse::getPosition(*mLinkedWindow));
+                double mass     = mTempBody->getMass();
+                auto delta      = mTempBody->getPosition() - mousePos;
                 mTempBody->setVelocity(mass/100 * delta.x, mass/100 * delta.y);
 
                 addCelestialBody(*mTempBody);
@@ -122,7 +122,21 @@ namespace Celestial
 
         }
 
+        //
+        if(event.type == sf::Event::KeyReleased and event.key.code == sf::Keyboard::T)
+        {
+            mTrailArray.clear();
 
+            if(!sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
+            {
+                for(auto& b : mPlanetArray)
+                {
+                    gfx::Trail t;
+                    t.linkTo(b);
+                    mTrailArray.push_back(std::move(t));
+                }
+            }
+        }
     }
 
     void Sim::addCelestialBody(const Body &b)
@@ -330,6 +344,23 @@ namespace Celestial
                 mExplosionArray[i].update();
             }
         }
+
+        // Trails
+
+
+        for(size_t i(0) ; i < mTrailArray.size() ; ++i)
+        {
+            if(mTrailArray[i].isDestroyed())
+            {
+                auto it = mTrailArray.begin() + i;
+        	    *it = std::move(mTrailArray.back());
+        	    mTrailArray.pop_back();
+            }
+            else
+            {
+                mTrailArray[i].update();
+            }
+        }
     }
 
     void Sim::dislocateBody(const int& ind)
@@ -367,6 +398,8 @@ namespace Celestial
 
     void Sim::render() const
     {
+        for(auto& t : mTrailArray)
+            mLinkedWindow->draw(t);
 
         for(auto& b : mPlanetArray)
         {

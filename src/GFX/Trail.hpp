@@ -36,7 +36,7 @@ namespace gfx
         void            linkTo(const Celestial::Body::Ptr& body);
 
         virtual void    update();
-        void            clear(bool unlink = false);
+        void            clear();
 
         // Setters
         void    setMaxPoints(const unsigned& pts);
