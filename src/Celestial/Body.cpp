@@ -28,6 +28,16 @@ namespace Celestial
     : Body(pos.x,pos.y,vel.x,vel.y,mass)
     {}
 
+    Body::Body(const Body& body)
+    : sf::Transformable(body)
+    , mMass(body.mMass)
+    , mDensity(body.mDensity)
+    , mRadius(body.mRadius)
+    , mVelocity(body.mVelocity)
+    , mForce(body.mForce)
+    , mBody(body.mBody)
+    {}
+
 ////////// Methods
 
     void Body::update(sf::Time dt)

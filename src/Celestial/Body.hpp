@@ -25,12 +25,14 @@ namespace Celestial
     {
     public:
 
-        typedef std::shared_ptr<Body> Ptr;
+        typedef std::shared_ptr<Body>   Ptr;
+        typedef std::weak_ptr<Body>     WeakPtr;
 
     public:
         // Constructor
         Body(double rx, double ry, double vx, double vy, double mass);
         Body(sf::Vector2d pos, sf::Vector2d vel, double mass);
+        Body(const Body& body);
 
         // Methods
         void    update(sf::Time dt);

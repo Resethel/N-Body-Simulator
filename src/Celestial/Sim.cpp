@@ -20,7 +20,9 @@ namespace Celestial
     , mTempBody(nullptr)
     , mSpeedVector()
     , mTrailedBody(nullptr)
-    {}
+    {
+        mPlanetArray.reserve(2000);
+    }
 
 ////////// Methods
 
@@ -37,13 +39,13 @@ namespace Celestial
             //Updating the bodies using timestep dt
             for (size_t i(0) ; i < mPlanetArray.size(); ++i)
             {
-                mPlanetArray[i].update(dt);
+                mPlanetArray[i]->update(dt);
             }
 
             //joining back the threads
             phy_res_thread.join();
             eff_res_thread.join();
-
+/*
             if(mTrailedBody)
             {
                 if(mPlanetArray.empty())
@@ -51,21 +53,20 @@ namespace Celestial
 
                     mTrailedBody = nullptr;
                 }
-                else if(*mTrailedBody == mPlanetArray[0])
+                else if(*mTrailedBody == *mPlanetArray[0])
                 {
                     mTrail.pushNewPoint(mTrailedBody->getPosition());
                 }
                 else
                 {
                     mTrail.clear();
-                    mTrailedBody = &mPlanetArray[0];
+                    mTrailedBody = mPlanetArray[0].get();
                 }
             }
             else if(!mPlanetArray.empty())
             {
-                mTrailedBody = &mPlanetArray[0];
-            }
-
+                mTrailedBody = mPlanetArray[0].get();
+            }*/
 
             // incrementing the simulation step
             ++mSimulationStep;
@@ -78,6 +79,7 @@ namespace Celestial
 
     void Sim::handleEvent(const sf::Event& event)
     {
+        //
         if(event.type == sf::Event::MouseButtonPressed and event.mouseButton.button == sf::Mouse::Left)
         {
             if(!mouseHeldDown and sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
@@ -88,6 +90,7 @@ namespace Celestial
             }
         }
 
+        //
         if(event.type == sf::Event::MouseButtonReleased)
         {
             if(mouseHeldDown and mTempBody)
@@ -97,8 +100,10 @@ namespace Celestial
                 double mass = mTempBody->getMass();
                 auto delta = mTempBody->getPosition() - mousePos;
                 mTempBody->setVelocity(mass/100 * delta.x, mass/100 * delta.y);
+
                 addCelestialBody(*mTempBody);
-                mTempBody = nullptr;
+
+                mTempBody.reset();
 
             }
 
@@ -109,9 +114,9 @@ namespace Celestial
         if (sf::Mouse::isButtonPressed(sf::Mouse::Left)
             and mTempBody)
 	    {
-            auto pos = mTempBody->getPosition();
-            auto mousePos = mLinkedWindow->mapPixelToCoords(sf::Mouse::getPosition(*mLinkedWindow));
-            auto delta = pos - mousePos;
+            auto pos        = mTempBody->getPosition();
+            auto mousePos   = mLinkedWindow->mapPixelToCoords(sf::Mouse::getPosition(*mLinkedWindow));
+            auto delta      = pos - mousePos;
             mSpeedVector[0] = sf::Vertex(pos, sf::Color::Red);
 		    mSpeedVector[1] = sf::Vertex(pos + delta, sf::Color::Red);
 
@@ -120,12 +125,12 @@ namespace Celestial
 
     }
 
-    void Sim::addCelestialBody(Body &b)
+    void Sim::addCelestialBody(const Body &b)
     {
         ++mBodyCount;
         mTotalMass += b.getMass();
 
-        mPlanetArray.push_back(std::move(b));
+        mPlanetArray.push_back(std::make_shared<Body>(b));
     }
 
     void Sim::addCelestialBody(double x, double y, double vel_x, double vel_y, double mass)
@@ -133,7 +138,7 @@ namespace Celestial
         ++mBodyCount;
         mTotalMass += mass;
 
-        mPlanetArray.emplace_back(x, y, vel_x, vel_y, mass);
+        mPlanetArray.emplace_back(std::make_shared<Body>(x, y, vel_x, vel_y, mass));
     }
 
     void Sim::removeCelestialBody(const size_t& ind)
@@ -141,7 +146,7 @@ namespace Celestial
         auto it = mPlanetArray.begin() + ind;
 
         --mBodyCount;
-        mTotalMass -= it->getMass();
+        mTotalMass -= (*it)->getMass();
 
 	    *it = std::move(mPlanetArray.back());
 	    mPlanetArray.pop_back();
@@ -152,7 +157,7 @@ namespace Celestial
         mPlanetArray.clear();
 
         addCelestialBody(center_x, center_y, 0, 0, 150);
-        auto offset = mPlanetArray.back().getRadius() + 50;
+        auto offset = mPlanetArray.back()->getRadius() + 50;
 
         std::mt19937 generator;
         generator.seed(std::random_device()());
@@ -257,14 +262,14 @@ namespace Celestial
         {
             for(size_t first(0) ; first < mPlanetArray.size() ; ++first)
             {
-                a = &mPlanetArray[first];
+                a = mPlanetArray[first].get();
                 a->resetForce();
 
                 for(size_t second(0) ; second < mPlanetArray.size() ; ++second)
                 {
                     if(first != second)
                     {
-                        b = &mPlanetArray[second];
+                        b = mPlanetArray[second].get();
 
                         // Check for Roche Limit Dislocation
                         if(a->isInsideRocheLimitOf(*b))
@@ -333,10 +338,10 @@ namespace Celestial
         if (!mPlanetArray.empty())
 	    {
     		double amount = utils::rand<int>(4, 8);
-    		double mass = mPlanetArray[ind].getMass();
-    		auto pos = mPlanetArray[ind].getPosition();
-            auto vel = mPlanetArray[ind].getVelocity();
-    		double radius = mPlanetArray[ind].getRadius();
+    		double mass   = mPlanetArray[ind]->getMass();
+    		auto pos      = mPlanetArray[ind]->getPosition();
+            auto vel      = mPlanetArray[ind]->getVelocity();
+    		double radius = mPlanetArray[ind]->getRadius();
 
     		double angle = 0;
 
@@ -349,9 +354,8 @@ namespace Celestial
                         , mass/amount);
 
                 angle += 2 * M_PI / amount;
-                //angle = utils::rand<int>(0,360) / (2* M_PI);
-    			addCelestialBody(Q);
 
+    			addCelestialBody(Q);
 
     		}
 
@@ -363,12 +367,10 @@ namespace Celestial
 
     void Sim::render() const
     {
-        if(mTrailedBody)
-            mLinkedWindow->draw(mTrail);
 
         for(auto& b : mPlanetArray)
         {
-            mLinkedWindow->draw(b);
+            mLinkedWindow->draw(*b);
         }
 
         // drawing explosions

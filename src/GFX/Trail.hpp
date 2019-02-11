@@ -33,7 +33,7 @@ namespace gfx
 
         // Methods
         void            pushNewPoint(const sf::Vector2f& point);
-        void            linkTo(const Celestial::Body& body);
+        void            linkTo(const Celestial::Body::Ptr& body);
 
         virtual void    update();
         void            clear(bool unlink = false);
@@ -55,7 +55,7 @@ namespace gfx
         std::deque<sf::Vector2f>    mPoints;
         sf::VertexArray             mVertices;
 
-        Celestial::Body*            mLinkedBody;
+        Celestial::Body::WeakPtr    mLinkedBody;
 
     };
 

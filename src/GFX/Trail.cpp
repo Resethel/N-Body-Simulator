@@ -24,7 +24,7 @@ namespace gfx
 
     Trail::~Trail()
     {
-        mLinkedBody = nullptr;
+        mLinkedBody.reset();
     }
 
 ////////// Methods
@@ -69,21 +69,25 @@ namespace gfx
 
     }
 
+    void Trail::linkTo(const Celestial::Body::Ptr& body)
+    {
+        mLinkedBody = body;
+    }
+
     void Trail::update()
     {
-        if(mLinkedBody)
-            pushNewPoint(mLinkedBody->getPosition());
+        if(!mLinkedBody.expired())
+            pushNewPoint(mLinkedBody.lock()->getPosition());
+        else
+            destroy();
 
         Effect::update();
     }
 
-    void Trail::clear(bool unlink)
+    void Trail::clear()
     {
         mPoints.clear();
         mVertices.clear();
-
-        if(unlink)
-            mLinkedBody = nullptr;
     }
 
 

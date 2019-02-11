@@ -29,8 +29,8 @@ namespace Celestial
     {
     public:
 
-        typedef std::vector<Celestial::Body>    BodyContainer;
-        typedef std::vector<gfx::Explosion>     ExplosionContainer;
+        typedef std::vector<Body::Ptr>      BodyContainer;
+        typedef std::vector<gfx::Explosion> ExplosionContainer;
 
     public:
         // Constructor
@@ -40,7 +40,8 @@ namespace Celestial
         void    update(sf::Time dt);
         void    handleEvent(const sf::Event& event);
 
-        void    addCelestialBody(Body& b);
+        void    addCelestialBody(const Body& b);
+        void    addCelestialBody(Body::Ptr b);
         void    addCelestialBody(double x, double y, double vel_x, double vel_y, double mass);
         void    removeCelestialBody(const size_t& ind);
         void    populate(size_t number, int center_x, int center_y, int radius);
