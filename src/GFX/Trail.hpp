@@ -6,11 +6,13 @@
 #ifndef TRAIL_HPP
 #define TRAIL_HPP
 
-#include <memory>
+#include <cmath>
 #include <deque>
+#include <memory>
 
 #include <SFML/Graphics.hpp>
 
+#include "../Constant.hpp"
 #include "../Celestial/Body.hpp"
 #include "Effect.hpp"
 

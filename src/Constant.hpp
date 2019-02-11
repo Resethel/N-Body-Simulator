@@ -38,6 +38,9 @@ namespace CONSTANT
     const double EXPLOSION_LIGHT_STRENGTH = 50;
     const size_t EXPLOSION_POINT_COUNT = 50;
 
+    // Graphics
+    const double TRAIL_FADE_RATIO = 0.3;
+
 
 }
 

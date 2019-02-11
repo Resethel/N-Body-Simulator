@@ -99,6 +99,11 @@ namespace Celestial
 
 ////////// Getters
 
+    sf::Color Body::getColor() const
+    {
+        return mBody.getFillColor();
+    }
+    
     double Body::getMass() const
     {
         return mMass;

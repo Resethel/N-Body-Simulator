@@ -46,6 +46,7 @@ namespace Celestial
 
         bool   isInsideRocheLimitOf(const Body& Primary) const;
         // Getters
+        sf::Color       getColor() const;
         double          getMass() const;
         float           getRadius() const;
         sf::Vector2d    getVelocity() const;
