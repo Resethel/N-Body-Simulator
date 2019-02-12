@@ -9,6 +9,8 @@
 namespace Celestial
 {
 
+
+
     Sim::Sim(sf::RenderWindow& window)
     : mLinkedWindow(&window)
     , mPlanetArray()
@@ -25,57 +27,8 @@ namespace Celestial
     }
 
 ////////// Methods
+//////////////////// for Simulation
 
-    void Sim::update(sf::Time dt)
-    {
-        if(isRunning() and !mPlanetArray.empty())
-        {
-            // Handling collisions, roche limit and force update
-            std::thread phy_res_thread(&Sim::physicalResolution, this);
-
-            // Handling effects
-            std::thread eff_res_thread(&Sim::effectsResolution, this);
-
-            //Updating the bodies using timestep dt
-            for (size_t i(0) ; i < mPlanetArray.size(); ++i)
-            {
-                mPlanetArray[i]->update(dt);
-            }
-
-            //joining back the threads
-            phy_res_thread.join();
-            eff_res_thread.join();
-/*
-            if(mTrailedBody)
-            {
-                if(mPlanetArray.empty())
-                {
-
-                    mTrailedBody = nullptr;
-                }
-                else if(*mTrailedBody == *mPlanetArray[0])
-                {
-                    mTrail.pushNewPoint(mTrailedBody->getPosition());
-                }
-                else
-                {
-                    mTrail.clear();
-                    mTrailedBody = mPlanetArray[0].get();
-                }
-            }
-            else if(!mPlanetArray.empty())
-            {
-                mTrailedBody = mPlanetArray[0].get();
-            }*/
-
-            // incrementing the simulation step
-            ++mSimulationStep;
-
-        }
-
-
-
-    }
 
     void Sim::handleEvent(const sf::Event& event)
     {
@@ -113,12 +66,12 @@ namespace Celestial
         // Drawing the velocity vector for a new body
         if (sf::Mouse::isButtonPressed(sf::Mouse::Left)
             and mTempBody)
-	    {
+        {
             auto pos        = mTempBody->getPosition();
             auto mousePos   = mLinkedWindow->mapPixelToCoords(sf::Mouse::getPosition(*mLinkedWindow));
             auto delta      = pos - mousePos;
             mSpeedVector[0] = sf::Vertex(pos, sf::Color::Red);
-		    mSpeedVector[1] = sf::Vertex(pos + delta, sf::Color::Red);
+            mSpeedVector[1] = sf::Vertex(pos + delta, sf::Color::Red);
 
         }
 
@@ -138,6 +91,86 @@ namespace Celestial
             }
         }
     }
+
+    void Sim::update(sf::Time dt)
+    {
+        if(isRunning() and !mPlanetArray.empty())
+        {
+            // Handling collisions, roche limit and force update
+            std::thread phy_res_thread(&Sim::physicalResolution, this);
+
+            // Handling effects
+            std::thread eff_res_thread(&Sim::effectsResolution, this);
+
+            //Updating the bodies using timestep dt
+            for (size_t i(0) ; i < mPlanetArray.size(); ++i)
+            {
+                mPlanetArray[i]->update(dt);
+            }
+
+            //joining back the threads
+            phy_res_thread.join();
+            eff_res_thread.join();
+
+
+            // incrementing the simulation step
+            ++mSimulationStep;
+
+        }
+    }
+
+    void Sim::render() const
+    {
+        for(auto& t : mTrailArray)
+            mLinkedWindow->draw(t);
+
+        for(auto& b : mPlanetArray)
+        {
+            mLinkedWindow->draw(*b);
+        }
+
+        // drawing explosions
+        for(auto& expl : mExplosionArray)
+        {
+            mLinkedWindow->draw(expl);
+        }
+
+        if(mouseHeldDown and mTempBody)
+        {
+            mLinkedWindow->draw(mSpeedVector, 2, sf::Lines);
+            mLinkedWindow->draw(*mTempBody);
+        }
+    }
+
+    void Sim::run()
+    {
+        mIsRunning = true;
+    }
+
+    void Sim::stop()
+    {
+        mIsRunning = false;
+    }
+
+    void Sim::reset()
+    {
+        mPlanetArray.clear();
+        mTempBody.reset();
+
+        // resetting the counters
+        mTotalMass = 0;
+        mBodyCount = 0;
+        mSimulationStep = 0;
+    }
+
+    bool Sim::isRunning() const
+    {
+        return mIsRunning;
+    }
+
+
+//////////////////// for Celestial bodies
+
 
     void Sim::addCelestialBody(const Body &b)
     {
@@ -208,6 +241,10 @@ namespace Celestial
 	    }
     }
 
+
+//////////////////// for Graphical Effects
+
+
     void Sim::addExplosion(gfx::Explosion& expl)
     {
         mExplosionArray.push_back(std::move(expl));
@@ -221,33 +258,9 @@ namespace Celestial
 	    mExplosionArray.pop_back();
     }
 
-    bool Sim::isRunning() const
-    {
-        return mIsRunning;
-    }
-
-    void Sim::run()
-    {
-        mIsRunning = true;
-    }
-
-    void Sim::stop()
-    {
-        mIsRunning = false;
-    }
-
-    void Sim::reset()
-    {
-        mPlanetArray.clear();
-        mTempBody.reset();
-
-        // resetting the counters
-        mTotalMass = 0;
-        mBodyCount = 0;
-        mSimulationStep = 0;
-    }
 
 ////////// Getters
+
 
     unsigned Sim::getBodyCount() const
     {
@@ -264,7 +277,9 @@ namespace Celestial
         return mSimulationStep;
     }
 
+
 ////////// Internal Handling
+
 
     void Sim::physicalResolution()
     {
@@ -394,31 +409,6 @@ namespace Celestial
         }
     }
 
-////////// Draw
-
-    void Sim::render() const
-    {
-        for(auto& t : mTrailArray)
-            mLinkedWindow->draw(t);
-
-        for(auto& b : mPlanetArray)
-        {
-            mLinkedWindow->draw(*b);
-        }
-
-        // drawing explosions
-        for(auto& expl : mExplosionArray)
-        {
-            mLinkedWindow->draw(expl);
-        }
-
-        if(mouseHeldDown and mTempBody)
-        {
-            mLinkedWindow->draw(mSpeedVector, 2, sf::Lines);
-            mLinkedWindow->draw(*mTempBody);
-        }
-    }
 
 
-
-}
+} // namespace Celestial

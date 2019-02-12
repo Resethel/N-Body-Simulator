@@ -20,12 +20,12 @@ namespace CONSTANT
     const double MIN_DISTANCE_FOR_CALCULATION = 10 * std::numeric_limits<double>().epsilon();
 
     // BODY_TYPE_MASS
-    const double ROCKY_LIMIT = 15;
-    const double TERRESTIAL_LIMIT = 50;
-    const double GAS_GIANT_LIMIT = 400;
-    const double SMALL_STAR_LIMIT = 800;
-    const double STAR_LIMIT = 1500;
-    const double BIG_STAR_LIMIT = 3500;
+    const double ROCKY_LIMIT        = 15;
+    const double TERRESTIAL_LIMIT   = 50;
+    const double GAS_GIANT_LIMIT    = 400;
+    const double SMALL_STAR_LIMIT   = 800;
+    const double STAR_LIMIT         = 1500;
+    const double BIG_STAR_LIMIT     = 3500;
 
     // ROCHE_LIMIT
     const double ROCHE_LIMIT_MULTIPLIER = 4.6; // Multiplier for simulation

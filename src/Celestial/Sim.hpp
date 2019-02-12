@@ -38,26 +38,26 @@ namespace Celestial
         Sim(sf::RenderWindow& window);
 
         // Methods
-        void    update(sf::Time dt);
+        // for Simulation
         void    handleEvent(const sf::Event& event);
+        void    update(sf::Time dt);
+        void    render() const;
 
-        void    addCelestialBody(const Body& b);
-        void    addCelestialBody(Body::Ptr b);
-        void    addCelestialBody(double x, double y, double vel_x, double vel_y, double mass);
-        void    removeCelestialBody(const size_t& ind);
-        void    populate(size_t number, int center_x, int center_y, int radius);
-
-        void    addExplosion(gfx::Explosion& expl);
-        void    removeExplosion(const size_t& ind);
-
-        bool    isRunning() const;
         void    run();
         void    stop();
         void    reset();
+        bool    isRunning() const;
 
-        void    render() const;
+        //// for Celestial bodies
+        void    addCelestialBody(const Body& b);
+        void    addCelestialBody(double x, double y, double vel_x, double vel_y, double mass);
+        void    removeCelestialBody(const size_t& ind);
 
+        void    populate(size_t number, int center_x, int center_y, int radius);
 
+        //// for Graphical Effects
+        void    addExplosion(gfx::Explosion& expl);
+        void    removeExplosion(const size_t& ind);
 
         // getters
         unsigned            getBodyCount() const;
@@ -88,8 +88,6 @@ namespace Celestial
 
         bool                mIsRunning;
         bool                mouseHeldDown;
-
-
 
         // Temporary celestial Body
         Body::Ptr           mTempBody;
