@@ -44,6 +44,10 @@ Core::Core()
     str += "Hide Help (H)\n";
 
     mControls.setString(str);
+
+    mOverlay = mStats;
+    mOverlay.setString("");
+    mOverlay.setFillColor(sf::Color::Transparent);
 }
 
 
@@ -84,7 +88,7 @@ void Core::run()
 }
 
 
-////////////
+//////////// Internal Handling
 
 void Core::update(sf::Time dt)
 {
@@ -96,7 +100,28 @@ void Core::update(sf::Time dt)
     mStats.setString(mStats.getString() + "Total mass: " + std::to_string(mSimulator.getTotalMass()) + "\n");
     mStats.setString(mStats.getString() + "Bodies: " + std::to_string(mSimulator.getBodyCount()) + "\n");
     mStats.setString(mStats.getString() + "Zoom: " + std::to_string(zoom));
+
+    // Updating overlay
+    if (!pointedAtBody.expired())
+    {
+        auto body = pointedAtBody.lock();
+        std::string str;
+
+        mOverlay.setPosition(body->getPosition() + sf::Vector2f(body->getRadius(),-body->getRadius()));
+        str += "Mass: " + std::to_string(body->getMass()) + "\n";
+        str += "Velocity: " + std::to_string(utils::norm<double>(body->getVelocity())) + "\n";
+        str += "x: " + std::to_string(body->getPosition().x) + " y: " + std::to_string(body->getPosition().x) + "\n";
+
+        mOverlay.setString(str);
+    }
+    else
+    {
+        mOverlay.setFillColor(sf::Color::Transparent);
+    }
+
 }
+
+
 
 void Core::processInput()
 {
@@ -109,7 +134,6 @@ void Core::processInput()
         {
             mMainWindow.close();
         }
-
 
         if (event.type == sf::Event::KeyReleased)
         {
@@ -161,7 +185,35 @@ void Core::processInput()
         {
             if(event.mouseButton.button == sf::Mouse::Left)
             {
-                draggingView = false;
+                if(draggingView)
+                {
+                    draggingView = false;
+                }
+                else if (!( sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) or
+                            sf::Keyboard::isKeyPressed(sf::Keyboard::RControl) or
+                            sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) or
+                            sf::Keyboard::isKeyPressed(sf::Keyboard::RShift)))
+                {
+                    auto mousePos =  mMainWindow.mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+                    if(pointedAtBody.expired())
+                    {
+                        pointedAtBody = mSimulator.getBodyAtPosition(mousePos);
+                        if(!pointedAtBody.expired())
+                            mOverlay.setFillColor(sf::Color::White);
+                    }
+                    else
+                    {
+                        auto delta = pointedAtBody.lock()->getPosition() - mousePos;
+                        if(utils::norm<float>(delta) > pointedAtBody.lock()->getRadius() )
+                        {
+                            pointedAtBody = mSimulator.getBodyAtPosition(mousePos);
+                            if(pointedAtBody.expired())
+                                mOverlay.setFillColor(sf::Color::Transparent);
+                            else
+                                mOverlay.setFillColor(sf::Color::White);
+                        }
+                    }
+                }
             }
         }
 
@@ -214,11 +266,14 @@ void Core::processInput()
     }
 }
 
+
+
 void Core::render()
 {
     mMainWindow.clear(sf::Color(10, 10, 10));
 
     mSimulator.render();
+    mMainWindow.draw(mOverlay);
 
     sf::View v;
     v = mMainWindow.getView();

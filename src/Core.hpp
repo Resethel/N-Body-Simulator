@@ -6,6 +6,7 @@
 #ifndef CORE_HPP
 #define CORE_HPP
 
+#include <memory>
 #include <vector>
 #include <SFML/Graphics.hpp>
 #include <SFML/System/Time.hpp>
@@ -22,7 +23,7 @@ public:
     void run();
 
 private:
-
+    // Internal Handling
     void    update(sf::Time dt);
     void    processInput();
     void    render();
@@ -44,10 +45,16 @@ private:
     float                   zoom;
     sf::View                view;
 
+    //
+    std::weak_ptr<const Celestial::Body> pointedAtBody;
+
+
     // Temporary Text and font
     sf::Text                mStats;
     sf::Text                mControls;
     sf::Font                mFont;
+
+    sf::Text                mOverlay;
 
 };
 

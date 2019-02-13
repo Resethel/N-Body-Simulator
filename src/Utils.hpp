@@ -69,6 +69,12 @@ namespace utils
    }
 
    template <typename T>
+   inline T norm(const sf::Vector2<T>& vec)
+   {
+       return std::sqrt(vec.x * vec.x+ vec.y * vec.y);
+   }
+
+   template <typename T>
    inline T norm(const T& vec_x, const T& vec_y)
    {
        return std::sqrt(vec_x * vec_x + vec_y * vec_y);

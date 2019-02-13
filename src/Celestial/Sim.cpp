@@ -168,6 +168,24 @@ namespace Celestial
         return mIsRunning;
     }
 
+    std::weak_ptr<const Body> Sim::getBodyAtPosition(sf::Vector2f pos) const
+    {
+        std::weak_ptr<const Body> body;
+
+        // Try to find the body;
+        auto found = std::find_if(mPlanetArray.begin(), mPlanetArray.end(),
+            [&](const Body::Ptr& b)
+            {
+                auto delta = b->getPosition() - pos;
+                return utils::norm<float>(delta) < b->getRadius();
+            });
+
+        if(found != mPlanetArray.end())
+            body = *found;
+
+        return body;
+
+    }
 
 //////////////////// for Celestial bodies
 

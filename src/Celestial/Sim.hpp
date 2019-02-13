@@ -6,6 +6,9 @@
 #ifndef CELESTIAL_SIM_HPP
 #define CELESTIAL_SIM_HPP
 
+#include <algorithm>
+#include <cmath>
+#include <memory>
 #include <random>
 #include <vector>
 #include <thread>
@@ -48,6 +51,8 @@ namespace Celestial
         void    reset();
         bool    isRunning() const;
 
+        std::weak_ptr<const Body> getBodyAtPosition(sf::Vector2f pos) const;
+
         //// for Celestial bodies
         void    addCelestialBody(const Body& b);
         void    addCelestialBody(double x, double y, double vel_x, double vel_y, double mass);
@@ -60,9 +65,13 @@ namespace Celestial
         void    removeExplosion(const size_t& ind);
 
         // getters
+
         unsigned            getBodyCount() const;
         double              getTotalMass() const;
         unsigned long long  getSimulationStep() const;
+
+
+
 
     protected:
         // Internal handling
