@@ -37,14 +37,14 @@ namespace Celestial
         // Methods
         void    update(sf::Time dt);
 
-        double  distanceTo(const Body& body) const;
         void    addForce(const Body& body);
-        bool    hasCollidedWith(const Body& body) const;
         void    resetForce();
-        void    updateVelocity(const Body& b, sf::Time dt);
-        void    explode();
 
-        bool   isInsideRocheLimitOf(const Body& Primary) const;
+        void    absorbs(const Body& b);
+
+        double  distanceTo(const Body& body) const;
+        bool    hasCollidedWith(const Body& body) const;
+        bool    isInsideRocheLimitOf(const Body& Primary) const;
         // Getters
         sf::Color       getColor() const;
         double          getMass() const;
