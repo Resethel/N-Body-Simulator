@@ -27,6 +27,10 @@ namespace CONSTANT
     const double STAR_LIMIT         = 1500;
     const double BIG_STAR_LIMIT     = 3500;
 
+    // COLLISIONS
+
+    const double COLLISION_ABSORPTION_RATIO = 1.01;
+
     // ROCHE_LIMIT
     const double ROCHE_LIMIT_MULTIPLIER = 4.6; // Multiplier for simulation
     const double ROCHE_LIMIT_MIN_MASS_RATIO = 0.4; // Minimum mass ration for tidal force to rip a celestial body

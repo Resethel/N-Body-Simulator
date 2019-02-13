@@ -102,15 +102,20 @@ namespace Celestial
             // Handling effects
             std::thread eff_res_thread(&Sim::effectsResolution, this);
 
-            //Updating the bodies using timestep dt
+            Body::WeakPtr body;
             for (size_t i(0) ; i < mPlanetArray.size(); ++i)
             {
-                mPlanetArray[i]->update(dt);
+                body = mPlanetArray[i];
+                if(!body.expired())
+                    body.lock()->update(dt);
             }
 
             //joining back the threads
             phy_res_thread.join();
             eff_res_thread.join();
+
+            //Updating the bodies using timestep dt
+
 
 
             // incrementing the simulation step
@@ -311,24 +316,45 @@ namespace Celestial
                         // Check for collision
                         else if( (*a) != (*b) and a->hasCollidedWith(*b))
                         {
-                            // Create the resulting fused Body.
-                            auto fusion = ((*a) + (*b));
-
-                            // Add an explosion at impact
+                            // Add an explosion at impact point
                             gfx::Explosion expl(a->getPosition());
                             if(b->getMass() < a->getMass())
                             {
                                 expl.setPosition(b->getPosition());
                             }
-
                             addExplosion(expl);
 
-                            // Add the fused body to the simulation
-                            addCelestialBody(fusion);
 
-                            //erase the two collided planets.
-                            removeCelestialBody(second);
-                            removeCelestialBody(first);
+                            double massRatio = a->getMass() / b->getMass();
+                            massRatio = (massRatio > 1 )? 1/massRatio : massRatio;
+
+
+                            if(massRatio < CONSTANT::COLLISION_ABSORPTION_RATIO)
+                            {
+                                if(a->getMass() > b->getMass())
+                                {
+                                    a->absorbs(*b);
+                                    removeCelestialBody(second);
+                                }
+                                else
+                                {
+                                    b->absorbs(*a);
+                                    removeCelestialBody(first);
+                                }
+                            }
+                            else
+                            {
+                                // Create the resulting fused Body.
+                                auto fusion = ((*a) + (*b));
+
+                                // Add the fused body to the simulation
+                                addCelestialBody(fusion);
+
+                                //erase the two collided planets.
+                                removeCelestialBody(second);
+                                removeCelestialBody(first);
+                            }
+
 
                             break; // we exit the loop as we only update 1 collision
                         }
