@@ -45,7 +45,8 @@ namespace CONSTANT
     // Graphics
     const double TRAIL_FADE_RATIO = 0.3;
 
-
+    // GUI
+    const double VELOCITY_LINE_MULTIPLIER = 2.5;
 }
 
 #endif // CONSTANT_HPP

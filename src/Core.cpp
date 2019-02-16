@@ -18,17 +18,23 @@ Core::Core()
 , zoom(1)
 , view(mMainWindow.getDefaultView())
 {
-    mMainWindow.setFramerateLimit(60);
+    // Pausing the simulation
     mSimulator.stop();
 
+    // Setting Framerate Limit
+    mMainWindow.setFramerateLimit(60);
+
+    // Loading font
     if(!mFont.loadFromFile("media/Sansation.ttf"))
         throw std::runtime_error("unable to load mFont");
 
+    // Configuring Statistic display
     mStats.setFont(mFont);
     mStats.setCharacterSize(24);
     mStats.setString("Step:\nTimestep:\nTotal mass:\nBodies:\nZoom:");
     mStats.setPosition(15,10);
 
+    // Configuring Controls display
     mControls = mStats;
     mControls.setPosition(15, 10 + mStats.getGlobalBounds().height + 50);
     std::string str;
@@ -45,11 +51,18 @@ Core::Core()
 
     mControls.setString(str);
 
+    // Configuring Overlay display
     mOverlay = mStats;
     mOverlay.setString("");
     mOverlay.setFillColor(sf::Color::Transparent);
 
+    // Configuring
+
     SAline.setPrimitiveType(sf::Lines);
+    SAline.resize(2);
+
+    velocityLine.setPrimitiveType(sf::Lines);
+    velocityLine.resize(2);
 }
 
 
@@ -107,7 +120,7 @@ void Core::update(sf::Time dt)
     mStats.setString(str);
     // Updating overlay
 
-    SAline.clear();
+
 
     if (!selectedBody.expired())
     {
@@ -124,18 +137,31 @@ void Core::update(sf::Time dt)
 
         mOverlay.setString(str);
 
-        // Drawing the line
+        // Drawing the lines
         sf::Vertex v;
 
         v.position = body->getPosition();
         v.color = sf::Color::Yellow;
 
-        SAline.append(v);
+        SAline[0] = v;
 
         v.position = body->getStrongestAttractorPosition();
         v.color = sf::Color::Yellow;
 
-        SAline.append(v);
+        SAline[1] = v;
+
+
+        v.position = body->getPosition();
+        v.color = sf::Color::Red;
+
+        velocityLine[0] = v;
+
+        v.position = body->getPosition() + sf::Vector2f(CONSTANT::VELOCITY_LINE_MULTIPLIER * body->getVelocity());
+        v.color = sf::Color::Red;
+
+        velocityLine[1] = v;
+
+
 
     }
     else
@@ -314,9 +340,10 @@ void Core::processInput()
 
 void Core::render()
 {
+    // Clearing the screen
     mMainWindow.clear(sf::Color(10, 10, 10));
 
-    // View lock
+    // Locking the view if needed
     if(!lockedOnBody.expired())
     {
         auto v = mMainWindow.getView();
@@ -324,13 +351,16 @@ void Core::render()
         mMainWindow.setView(v);
     }
 
-
-    if(SAline.getVertexCount() != 0)
+    // Drawing the line for info display
+    if(!selectedBody.expired())
+    {
         mMainWindow.draw(SAline);
-
+        mMainWindow.draw(velocityLine);
+    }
+    // Rendering the simulation
     mSimulator.render();
 
-
+    // Drawing overlay informations
     auto v = mMainWindow.getView();
     mMainWindow.setView(mMainWindow.getDefaultView());
 

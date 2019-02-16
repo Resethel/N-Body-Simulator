@@ -45,10 +45,11 @@ private:
     float                   zoom;
     sf::View                view;
 
-    //
-    std::weak_ptr<const Celestial::Body> selectedBody;
-    std::weak_ptr<const Celestial::Body> lockedOnBody;
-    sf::VertexArray SAline;
+    // For Information display
+    Celestial::Body::ConstWeakPtr   selectedBody;
+    Celestial::Body::ConstWeakPtr   lockedOnBody;
+    sf::VertexArray                 SAline; // To strongest attractor
+    sf::VertexArray                 velocityLine; // Velocity
 
 
     // Temporary Text and font

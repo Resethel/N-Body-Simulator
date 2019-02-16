@@ -25,8 +25,9 @@ namespace Celestial
     {
     public:
 
-        typedef std::shared_ptr<Body>   Ptr;
-        typedef std::weak_ptr<Body>     WeakPtr;
+        typedef std::shared_ptr<Body>       Ptr;
+        typedef std::weak_ptr<Body>         WeakPtr;
+        typedef std::weak_ptr<const Body>   ConstWeakPtr;
 
     public:
         // Constructor
