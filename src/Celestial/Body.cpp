@@ -54,13 +54,19 @@ namespace Celestial
         double dx = body.getPosition().x - getPosition().x;
         double dy = body.getPosition().y - getPosition().y;
         double dist = std::sqrt(dx*dx + dy*dy);
-
+        double F = 0;
         if(dist >= CONSTANT::MIN_DISTANCE_FOR_CALCULATION)
         {
-            double F = (CONSTANT::G * this->mMass * body.getMass()) / (dist*dist);
+            F = (CONSTANT::G * this->mMass * body.getMass()) / (dist*dist);
 
             mForce.x += F * dx / dist;
             mForce.y += F * dy / dist;
+        }
+
+        if(F > mForceStrongestAttractor)
+        {
+            mForceStrongestAttractor = F;
+            mStrongestAttractorPosition = body.getPosition();
         }
 
     }
@@ -68,6 +74,7 @@ namespace Celestial
     void Body::resetForce()
     {
         mForce = sf::Vector2d(0,0);
+        mForceStrongestAttractor = 0;
     }
 
     void Body::absorbs(const Body& b)
@@ -133,6 +140,11 @@ namespace Celestial
     float Body::getRadius() const
     {
         return mRadius;
+    }
+
+    sf::Vector2f Body::getStrongestAttractorPosition() const
+    {
+        return mStrongestAttractorPosition;
     }
 
     sf::Vector2d Body::getVelocity() const

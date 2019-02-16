@@ -46,7 +46,9 @@ private:
     sf::View                view;
 
     //
-    std::weak_ptr<const Celestial::Body> pointedAtBody;
+    std::weak_ptr<const Celestial::Body> selectedBody;
+    std::weak_ptr<const Celestial::Body> lockedOnBody;
+    sf::VertexArray SAline;
 
 
     // Temporary Text and font

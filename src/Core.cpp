@@ -48,6 +48,8 @@ Core::Core()
     mOverlay = mStats;
     mOverlay.setString("");
     mOverlay.setFillColor(sf::Color::Transparent);
+
+    SAline.setPrimitiveType(sf::Lines);
 }
 
 
@@ -102,9 +104,12 @@ void Core::update(sf::Time dt)
     mStats.setString(mStats.getString() + "Zoom: " + std::to_string(zoom));
 
     // Updating overlay
-    if (!pointedAtBody.expired())
+
+    SAline.clear();
+
+    if (!selectedBody.expired())
     {
-        auto body = pointedAtBody.lock();
+        auto body = selectedBody.lock();
         std::string str;
 
         mOverlay.setPosition(body->getPosition() + sf::Vector2f(body->getRadius(),-body->getRadius()));
@@ -113,10 +118,21 @@ void Core::update(sf::Time dt)
         str += "x: " + std::to_string(body->getPosition().x) + " y: " + std::to_string(body->getPosition().x) + "\n";
 
         mOverlay.setString(str);
+        sf::Vertex v;
+        v.position = body->getPosition();
+        v.color = sf::Color::Yellow;
+        SAline.append(v);
+        v.position = body->getStrongestAttractorPosition();
+        v.color = sf::Color::Yellow;
+        SAline.append(v);
+
+
+
     }
     else
     {
         mOverlay.setFillColor(sf::Color::Transparent);
+
     }
 
 }
@@ -154,15 +170,25 @@ void Core::processInput()
                     mTimeStepMultiplier = utils::clamp<float>(mTimeStepMultiplier-0.5f, 0.5, 100);
                 break;
 
+                // Resets the simulation
                 case sf::Keyboard::R:
                     mSimulator.reset();
                 break;
 
+                // Toggle Help Status
                 case sf::Keyboard::H:
                     if(mControls.getFillColor() == sf::Color::Transparent)
                         mControls.setFillColor(sf::Color::White);
                     else
                         mControls.setFillColor(sf::Color::Transparent);
+                break;
+
+                // Toggle view lock
+                case sf::Keyboard::L:
+                    if(!selectedBody.expired())
+                        lockedOnBody = selectedBody.lock();
+                    else
+                        lockedOnBody.reset();
                 break;
 
                 default:
@@ -171,13 +197,22 @@ void Core::processInput()
 
         }
 
+
+        // Mouse Events
+
         if (event.type == sf::Event::MouseButtonPressed)
         {
-            if((sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) or sf::Keyboard::isKeyPressed(sf::Keyboard::RControl))
-                and event.mouseButton.button == sf::Mouse::Left)
+            if(event.mouseButton.button == sf::Mouse::Left)
             {
-                draggingView = true;
-                oldMousePosition = mMainWindow.mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+                if( sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) or
+                    sf::Keyboard::isKeyPressed(sf::Keyboard::RControl))
+                {
+                    draggingView = true;
+                    oldMousePosition = mMainWindow.mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+
+                    // We stop the view lock
+                    lockedOnBody.reset();
+                }
             }
         }
 
@@ -195,19 +230,19 @@ void Core::processInput()
                             sf::Keyboard::isKeyPressed(sf::Keyboard::RShift)))
                 {
                     auto mousePos =  mMainWindow.mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
-                    if(pointedAtBody.expired())
+                    if(selectedBody.expired())
                     {
-                        pointedAtBody = mSimulator.getBodyAtPosition(mousePos);
-                        if(!pointedAtBody.expired())
+                        selectedBody = mSimulator.getBodyAtPosition(mousePos);
+                        if(!selectedBody.expired())
                             mOverlay.setFillColor(sf::Color::White);
                     }
                     else
                     {
-                        auto delta = pointedAtBody.lock()->getPosition() - mousePos;
-                        if(utils::norm<float>(delta) > pointedAtBody.lock()->getRadius() )
+                        auto delta = selectedBody.lock()->getPosition() - mousePos;
+                        if(utils::norm<float>(delta) > selectedBody.lock()->getRadius() )
                         {
-                            pointedAtBody = mSimulator.getBodyAtPosition(mousePos);
-                            if(pointedAtBody.expired())
+                            selectedBody = mSimulator.getBodyAtPosition(mousePos);
+                            if(selectedBody.expired())
                                 mOverlay.setFillColor(sf::Color::Transparent);
                             else
                                 mOverlay.setFillColor(sf::Color::White);
@@ -271,6 +306,18 @@ void Core::processInput()
 void Core::render()
 {
     mMainWindow.clear(sf::Color(10, 10, 10));
+
+    // View lock
+    if(!lockedOnBody.expired())
+    {
+        auto v = mMainWindow.getView();
+        v.setCenter(lockedOnBody.lock()->getPosition());
+        mMainWindow.setView(v);
+    }
+
+
+    if(SAline.getVertexCount() != 0)
+        mMainWindow.draw(SAline);
 
     mSimulator.render();
     mMainWindow.draw(mOverlay);

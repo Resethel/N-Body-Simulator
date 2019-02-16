@@ -45,10 +45,12 @@ namespace Celestial
         double  distanceTo(const Body& body) const;
         bool    hasCollidedWith(const Body& body) const;
         bool    isInsideRocheLimitOf(const Body& Primary) const;
+
         // Getters
         sf::Color       getColor() const;
         double          getMass() const;
         float           getRadius() const;
+        sf::Vector2f    getStrongestAttractorPosition() const;
         sf::Vector2d    getVelocity() const;
 
         // Setters
@@ -78,14 +80,17 @@ namespace Celestial
 
     private:
 
-        double  mMass; // masses are in "earth" measure
-        double  mDensity;
-        double  mRadius;
+        double          mMass; // masses are in "earth" measure
+        double          mDensity;
+        double          mRadius;
 
-        sf::Vector2d mVelocity; // velocity vector
-        sf::Vector2d mForce; // force vector
+        sf::Vector2d    mVelocity; // velocity vector
+        sf::Vector2d    mForce; // force vector
 
         sf::CircleShape mBody;
+
+        double          mForceStrongestAttractor;
+        sf::Vector2f    mStrongestAttractorPosition;
 
 
     };
