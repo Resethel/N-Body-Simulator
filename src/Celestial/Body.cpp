@@ -132,12 +132,17 @@ namespace Celestial
         return mBody.getFillColor();
     }
 
+    double Body::getDensity() const
+    {
+        return mDensity;
+    }
+
     double Body::getMass() const
     {
         return mMass;
     }
 
-    float Body::getRadius() const
+    double Body::getRadius() const
     {
         return mRadius;
     }

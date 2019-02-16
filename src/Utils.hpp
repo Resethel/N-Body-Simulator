@@ -8,7 +8,10 @@
 
 #include <algorithm>
 #include <cmath>
+#include <iomanip>
 #include <random>
+#include <sstream>
+#include <string>
 
 #include <SFML/Graphics.hpp>
 
@@ -85,6 +88,15 @@ namespace utils
    {
        std::uniform_int_distribution<T> uni_dist(min, max);
        return uni_dist(rng);
+   }
+
+   // A value to string conversion with precision control
+   inline std::string to_string(double x, int precision = 1)
+   {
+       std::stringstream stream;
+       stream << std::fixed << std::setprecision(precision) << x;
+
+       return stream.str();
    }
 
 

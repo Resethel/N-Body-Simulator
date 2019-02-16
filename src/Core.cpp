@@ -96,13 +96,15 @@ void Core::update(sf::Time dt)
 {
     mSimulator.update(dt);
 
+    std::string str;
     // Updating the Statistics
-    mStats.setString("Step: " + std::to_string(mSimulator.getSimulationStep()) + "\n");
-    mStats.setString(mStats.getString() + "Timestep: " + std::to_string(mTimeStepMultiplier) + "\n" );
-    mStats.setString(mStats.getString() + "Total mass: " + std::to_string(mSimulator.getTotalMass()) + "\n");
-    mStats.setString(mStats.getString() + "Bodies: " + std::to_string(mSimulator.getBodyCount()) + "\n");
-    mStats.setString(mStats.getString() + "Zoom: " + std::to_string(zoom));
+    str += "Step: "         + std::to_string(mSimulator.getSimulationStep()) + "\n";
+    str += "Timestep: "     + utils::to_string(mTimeStepMultiplier,2) + "\n" ;
+    str += "Total mass: "   + utils::to_string(mSimulator.getTotalMass(),3) + "\n";
+    str += "Bodies: "       + std::to_string(mSimulator.getBodyCount()) + "\n";
+    str += "Zoom: "         +  utils::to_string(zoom,2);
 
+    mStats.setString(str);
     // Updating overlay
 
     SAline.clear();
@@ -110,23 +112,30 @@ void Core::update(sf::Time dt)
     if (!selectedBody.expired())
     {
         auto body = selectedBody.lock();
-        std::string str;
+        str = "";
 
-        mOverlay.setPosition(body->getPosition() + sf::Vector2f(body->getRadius(),-body->getRadius()));
-        str += "Mass: " + std::to_string(body->getMass()) + "\n";
-        str += "Velocity: " + std::to_string(utils::norm<double>(body->getVelocity())) + "\n";
-        str += "x: " + std::to_string(body->getPosition().x) + " y: " + std::to_string(body->getPosition().x) + "\n";
+        mOverlay.setPosition(sf::Vector2f(mMainWindow.mapCoordsToPixel(body->getPosition())));
+        mOverlay.move(body->getRadius() * 1/zoom + 5, -body->getRadius() * 1/zoom);
+
+        str += "Radius: "   + utils::to_string(body->getRadius(),3) + "\n";
+        str += "Mass: "     + utils::to_string(body->getMass(),3) + "\n";
+        str += "Density: "  + utils::to_string(body->getDensity(),3) + "\n";
+        str += "Velocity: " + utils::to_string(utils::norm<double>(body->getVelocity()),3) + "\n";
 
         mOverlay.setString(str);
+
+        // Drawing the line
         sf::Vertex v;
+
         v.position = body->getPosition();
         v.color = sf::Color::Yellow;
+
         SAline.append(v);
+
         v.position = body->getStrongestAttractorPosition();
         v.color = sf::Color::Yellow;
+
         SAline.append(v);
-
-
 
     }
     else
@@ -320,14 +329,17 @@ void Core::render()
         mMainWindow.draw(SAline);
 
     mSimulator.render();
-    mMainWindow.draw(mOverlay);
 
-    sf::View v;
-    v = mMainWindow.getView();
+
+    auto v = mMainWindow.getView();
     mMainWindow.setView(mMainWindow.getDefaultView());
+
+    mMainWindow.draw(mOverlay);
     mMainWindow.draw(mStats);
     mMainWindow.draw(mControls);
+
     mMainWindow.setView(v);
+
     // End of the current frame
     mMainWindow.display();
 }

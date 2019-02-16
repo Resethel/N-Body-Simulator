@@ -48,8 +48,9 @@ namespace Celestial
 
         // Getters
         sf::Color       getColor() const;
+        double          getDensity() const;
         double          getMass() const;
-        float           getRadius() const;
+        double          getRadius() const;
         sf::Vector2f    getStrongestAttractorPosition() const;
         sf::Vector2d    getVelocity() const;
 
