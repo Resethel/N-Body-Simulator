@@ -54,9 +54,9 @@ namespace Celestial
         std::weak_ptr<const Body> getBodyAtPosition(sf::Vector2f pos) const;
 
         //// for Celestial bodies
-        void    addCelestialBody(const Body& b);
-        void    addCelestialBody(double x, double y, double vel_x, double vel_y, double mass);
-        void    removeCelestialBody(const size_t& ind);
+        void    addCelestialBody(const Body& b, bool update_mass = true);
+        void    addCelestialBody(double x, double y, double vel_x, double vel_y, double mass, bool update_mass = true);
+        void    removeCelestialBody(const size_t& ind, bool update_mass = true);
 
         void    populate(size_t number, int center_x, int center_y, int radius);
 

@@ -69,9 +69,9 @@ namespace Celestial
         {
             auto pos        = mTempBody->getPosition();
             auto mousePos   = mLinkedWindow->mapPixelToCoords(sf::Mouse::getPosition(*mLinkedWindow));
-            auto delta      = pos - mousePos;
+            auto delta      = (pos - mousePos) * CONSTANT::SLINGSHOT_MULTIPLIER;
             mSpeedVector[0] = sf::Vertex(pos, sf::Color::Red);
-            mSpeedVector[1] = sf::Vertex(pos + delta, sf::Color::Red);
+            mSpeedVector[1] = sf::Vertex(pos + delta , sf::Color::Red);
 
         }
 
@@ -195,28 +195,31 @@ namespace Celestial
 //////////////////// for Celestial bodies
 
 
-    void Sim::addCelestialBody(const Body &b)
+    void Sim::addCelestialBody(const Body &b, bool update_mass)
     {
         ++mBodyCount;
-        mTotalMass += b.getMass();
+        if(update_mass)
+            mTotalMass += b.getMass();
 
         mPlanetArray.push_back(std::make_shared<Body>(b));
     }
 
-    void Sim::addCelestialBody(double x, double y, double vel_x, double vel_y, double mass)
+    void Sim::addCelestialBody(double x, double y, double vel_x, double vel_y, double mass, bool update_mass)
     {
         ++mBodyCount;
-        mTotalMass += mass;
+        if(update_mass)
+            mTotalMass += mass;
 
         mPlanetArray.emplace_back(std::make_shared<Body>(x, y, vel_x, vel_y, mass));
     }
 
-    void Sim::removeCelestialBody(const size_t& ind)
+    void Sim::removeCelestialBody(const size_t& ind, bool update_mass)
     {
         auto it = mPlanetArray.begin() + ind;
 
         --mBodyCount;
-        mTotalMass -= (*it)->getMass();
+        if(update_mass)
+            mTotalMass -= (*it)->getMass();
 
 	    *it = std::move(mPlanetArray.back());
 	    mPlanetArray.pop_back();
@@ -352,12 +355,12 @@ namespace Celestial
                                 if(a->getMass() > b->getMass())
                                 {
                                     a->absorbs(*b);
-                                    removeCelestialBody(second);
+                                    removeCelestialBody(second,false);
                                 }
                                 else
                                 {
                                     b->absorbs(*a);
-                                    removeCelestialBody(first);
+                                    removeCelestialBody(first,false);
                                 }
                             }
                             else

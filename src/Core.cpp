@@ -161,8 +161,6 @@ void Core::update(sf::Time dt)
 
         velocityLine[1] = v;
 
-
-
     }
     else
     {
@@ -261,7 +259,7 @@ void Core::processInput()
                 }
                 else if (!( sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) or
                             sf::Keyboard::isKeyPressed(sf::Keyboard::RControl) or
-                            sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) or
+                            sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)   or
                             sf::Keyboard::isKeyPressed(sf::Keyboard::RShift)))
                 {
                     auto mousePos =  mMainWindow.mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
@@ -273,8 +271,9 @@ void Core::processInput()
                     }
                     else
                     {
-                        auto delta = selectedBody.lock()->getPosition() - mousePos;
-                        if(utils::norm<float>(delta) > selectedBody.lock()->getRadius() )
+                        auto body = selectedBody.lock();
+                        auto delta = body->getPosition() - mousePos;
+                        if(utils::norm<float>(delta) > body->getRadius())
                         {
                             selectedBody = mSimulator.getBodyAtPosition(mousePos);
                             if(selectedBody.expired())
@@ -357,6 +356,7 @@ void Core::render()
         mMainWindow.draw(SAline);
         mMainWindow.draw(velocityLine);
     }
+
     // Rendering the simulation
     mSimulator.render();
 

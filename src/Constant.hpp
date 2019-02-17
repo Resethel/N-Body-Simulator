@@ -47,6 +47,9 @@ namespace CONSTANT
 
     // GUI
     const double VELOCITY_LINE_MULTIPLIER = 2.5;
+
+    // OTHER
+    const float  SLINGSHOT_MULTIPLIER = 2.5;
 }
 
 #endif // CONSTANT_HPP
