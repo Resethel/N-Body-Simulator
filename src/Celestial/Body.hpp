@@ -19,31 +19,40 @@
 namespace Celestial
 {
 
+
+
     class Body : public sf::Transformable, public sf::Drawable
     {
     public:
 
-        typedef std::shared_ptr<Body> Ptr;
+        typedef std::shared_ptr<Body>       Ptr;
+        typedef std::weak_ptr<Body>         WeakPtr;
+        typedef std::weak_ptr<const Body>   ConstWeakPtr;
 
     public:
         // Constructor
         Body(double rx, double ry, double vx, double vy, double mass);
         Body(sf::Vector2d pos, sf::Vector2d vel, double mass);
+        Body(const Body& body);
 
         // Methods
         void    update(sf::Time dt);
 
-        double  distanceTo(const Body& body) const;
         void    addForce(const Body& body);
-        bool    hasCollidedWith(const Body& body) const;
         void    resetForce();
-        void    updateVelocity(const Body& b, sf::Time dt);
-        void    explode();
 
-        bool   isInsideRocheLimitOf(const Body& Primary) const;
+        void    absorbs(const Body& b);
+
+        double  distanceTo(const Body& body) const;
+        bool    hasCollidedWith(const Body& body) const;
+        bool    isInsideRocheLimitOf(const Body& Primary) const;
+
         // Getters
+        sf::Color       getColor() const;
+        double          getDensity() const;
         double          getMass() const;
-        float           getRadius() const;
+        double          getRadius() const;
+        sf::Vector2f    getStrongestAttractorPosition() const;
         sf::Vector2d    getVelocity() const;
 
         // Setters
@@ -73,14 +82,17 @@ namespace Celestial
 
     private:
 
-        double  mMass; // masses are in "earth" measure
-        double  mDensity;
-        double  mRadius;
+        double          mMass; // masses are in "earth" measure
+        double          mDensity;
+        double          mRadius;
 
-        sf::Vector2d mVelocity; // velocity vector
-        sf::Vector2d mForce; // force vector
+        sf::Vector2d    mVelocity; // velocity vector
+        sf::Vector2d    mForce; // force vector
 
         sf::CircleShape mBody;
+
+        double          mForceStrongestAttractor;
+        sf::Vector2f    mStrongestAttractorPosition;
 
 
     };

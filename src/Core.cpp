@@ -18,17 +18,23 @@ Core::Core()
 , zoom(1)
 , view(mMainWindow.getDefaultView())
 {
-    mMainWindow.setFramerateLimit(60);
+    // Pausing the simulation
     mSimulator.stop();
 
+    // Setting Framerate Limit
+    mMainWindow.setFramerateLimit(60);
+
+    // Loading font
     if(!mFont.loadFromFile("media/Sansation.ttf"))
         throw std::runtime_error("unable to load mFont");
 
+    // Configuring Statistic display
     mStats.setFont(mFont);
     mStats.setCharacterSize(24);
     mStats.setString("Step:\nTimestep:\nTotal mass:\nBodies:\nZoom:");
     mStats.setPosition(15,10);
 
+    // Configuring Controls display
     mControls = mStats;
     mControls.setPosition(15, 10 + mStats.getGlobalBounds().height + 50);
     std::string str;
@@ -44,6 +50,19 @@ Core::Core()
     str += "Hide Help (H)\n";
 
     mControls.setString(str);
+
+    // Configuring Overlay display
+    mOverlay = mStats;
+    mOverlay.setString("");
+    mOverlay.setFillColor(sf::Color::Transparent);
+
+    // Configuring
+
+    SAline.setPrimitiveType(sf::Lines);
+    SAline.resize(2);
+
+    velocityLine.setPrimitiveType(sf::Lines);
+    velocityLine.resize(2);
 }
 
 
@@ -84,19 +103,74 @@ void Core::run()
 }
 
 
-////////////
+//////////// Internal Handling
 
 void Core::update(sf::Time dt)
 {
     mSimulator.update(dt);
 
+    std::string str;
     // Updating the Statistics
-    mStats.setString("Step: " + std::to_string(mSimulator.getSimulationStep()) + "\n");
-    mStats.setString(mStats.getString() + "Timestep: " + std::to_string(mTimeStepMultiplier) + "\n" );
-    mStats.setString(mStats.getString() + "Total mass: " + std::to_string(mSimulator.getTotalMass()) + "\n");
-    mStats.setString(mStats.getString() + "Bodies: " + std::to_string(mSimulator.getBodyCount()) + "\n");
-    mStats.setString(mStats.getString() + "Zoom: " + std::to_string(zoom));
+    str += "Step: "         + std::to_string(mSimulator.getSimulationStep()) + "\n";
+    str += "Timestep: "     + utils::to_string(mTimeStepMultiplier,2) + "\n" ;
+    str += "Total mass: "   + utils::to_string(mSimulator.getTotalMass(),3) + "\n";
+    str += "Bodies: "       + std::to_string(mSimulator.getBodyCount()) + "\n";
+    str += "Zoom: "         +  utils::to_string(zoom,2);
+
+    mStats.setString(str);
+    // Updating overlay
+
+
+
+    if (!selectedBody.expired())
+    {
+        auto body = selectedBody.lock();
+        str = "";
+
+        mOverlay.setPosition(sf::Vector2f(mMainWindow.mapCoordsToPixel(body->getPosition())));
+        mOverlay.move(body->getRadius() * 1/zoom + 5, -body->getRadius() * 1/zoom);
+
+        str += "Radius: "   + utils::to_string(body->getRadius(),3) + "\n";
+        str += "Mass: "     + utils::to_string(body->getMass(),3) + "\n";
+        str += "Density: "  + utils::to_string(body->getDensity(),3) + "\n";
+        str += "Velocity: " + utils::to_string(utils::norm<double>(body->getVelocity()),3) + "\n";
+
+        mOverlay.setString(str);
+
+        // Drawing the lines
+        sf::Vertex v;
+
+        v.position = body->getPosition();
+        v.color = sf::Color::Yellow;
+
+        SAline[0] = v;
+
+        v.position = body->getStrongestAttractorPosition();
+        v.color = sf::Color::Yellow;
+
+        SAline[1] = v;
+
+
+        v.position = body->getPosition();
+        v.color = sf::Color::Red;
+
+        velocityLine[0] = v;
+
+        v.position = body->getPosition() + sf::Vector2f(CONSTANT::VELOCITY_LINE_MULTIPLIER * body->getVelocity());
+        v.color = sf::Color::Red;
+
+        velocityLine[1] = v;
+
+    }
+    else
+    {
+        mOverlay.setFillColor(sf::Color::Transparent);
+
+    }
+
 }
+
+
 
 void Core::processInput()
 {
@@ -109,7 +183,6 @@ void Core::processInput()
         {
             mMainWindow.close();
         }
-
 
         if (event.type == sf::Event::KeyReleased)
         {
@@ -130,15 +203,25 @@ void Core::processInput()
                     mTimeStepMultiplier = utils::clamp<float>(mTimeStepMultiplier-0.5f, 0.5, 100);
                 break;
 
+                // Resets the simulation
                 case sf::Keyboard::R:
                     mSimulator.reset();
                 break;
 
+                // Toggle Help Status
                 case sf::Keyboard::H:
                     if(mControls.getFillColor() == sf::Color::Transparent)
                         mControls.setFillColor(sf::Color::White);
                     else
                         mControls.setFillColor(sf::Color::Transparent);
+                break;
+
+                // Toggle view lock
+                case sf::Keyboard::L:
+                    if(!selectedBody.expired())
+                        lockedOnBody = selectedBody.lock();
+                    else
+                        lockedOnBody.reset();
                 break;
 
                 default:
@@ -147,13 +230,22 @@ void Core::processInput()
 
         }
 
+
+        // Mouse Events
+
         if (event.type == sf::Event::MouseButtonPressed)
         {
-            if((sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) or sf::Keyboard::isKeyPressed(sf::Keyboard::RControl))
-                and event.mouseButton.button == sf::Mouse::Left)
+            if(event.mouseButton.button == sf::Mouse::Left)
             {
-                draggingView = true;
-                oldMousePosition = mMainWindow.mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+                if( sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) or
+                    sf::Keyboard::isKeyPressed(sf::Keyboard::RControl))
+                {
+                    draggingView = true;
+                    oldMousePosition = mMainWindow.mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+
+                    // We stop the view lock
+                    lockedOnBody.reset();
+                }
             }
         }
 
@@ -161,7 +253,36 @@ void Core::processInput()
         {
             if(event.mouseButton.button == sf::Mouse::Left)
             {
-                draggingView = false;
+                if(draggingView)
+                {
+                    draggingView = false;
+                }
+                else if (!( sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) or
+                            sf::Keyboard::isKeyPressed(sf::Keyboard::RControl) or
+                            sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)   or
+                            sf::Keyboard::isKeyPressed(sf::Keyboard::RShift)))
+                {
+                    auto mousePos =  mMainWindow.mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+                    if(selectedBody.expired())
+                    {
+                        selectedBody = mSimulator.getBodyAtPosition(mousePos);
+                        if(!selectedBody.expired())
+                            mOverlay.setFillColor(sf::Color::White);
+                    }
+                    else
+                    {
+                        auto body = selectedBody.lock();
+                        auto delta = body->getPosition() - mousePos;
+                        if(utils::norm<float>(delta) > body->getRadius())
+                        {
+                            selectedBody = mSimulator.getBodyAtPosition(mousePos);
+                            if(selectedBody.expired())
+                                mOverlay.setFillColor(sf::Color::Transparent);
+                            else
+                                mOverlay.setFillColor(sf::Color::White);
+                        }
+                    }
+                }
             }
         }
 
@@ -214,18 +335,41 @@ void Core::processInput()
     }
 }
 
+
+
 void Core::render()
 {
+    // Clearing the screen
     mMainWindow.clear(sf::Color(10, 10, 10));
 
+    // Locking the view if needed
+    if(!lockedOnBody.expired())
+    {
+        auto v = mMainWindow.getView();
+        v.setCenter(lockedOnBody.lock()->getPosition());
+        mMainWindow.setView(v);
+    }
+
+    // Drawing the line for info display
+    if(!selectedBody.expired())
+    {
+        mMainWindow.draw(SAline);
+        mMainWindow.draw(velocityLine);
+    }
+
+    // Rendering the simulation
     mSimulator.render();
 
-    sf::View v;
-    v = mMainWindow.getView();
+    // Drawing overlay informations
+    auto v = mMainWindow.getView();
     mMainWindow.setView(mMainWindow.getDefaultView());
+
+    mMainWindow.draw(mOverlay);
     mMainWindow.draw(mStats);
     mMainWindow.draw(mControls);
+
     mMainWindow.setView(v);
+
     // End of the current frame
     mMainWindow.display();
 }

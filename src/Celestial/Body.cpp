@@ -28,6 +28,16 @@ namespace Celestial
     : Body(pos.x,pos.y,vel.x,vel.y,mass)
     {}
 
+    Body::Body(const Body& body)
+    : sf::Transformable(body)
+    , mMass(body.mMass)
+    , mDensity(body.mDensity)
+    , mRadius(body.mRadius)
+    , mVelocity(body.mVelocity)
+    , mForce(body.mForce)
+    , mBody(body.mBody)
+    {}
+
 ////////// Methods
 
     void Body::update(sf::Time dt)
@@ -38,6 +48,52 @@ namespace Celestial
         move(dt.asSeconds() * mVelocity.x, dt.asSeconds() * mVelocity.y);
     }
 
+
+    void Body::addForce(const Body& body)
+    {
+        double dx = body.getPosition().x - getPosition().x;
+        double dy = body.getPosition().y - getPosition().y;
+        double dist = std::sqrt(dx*dx + dy*dy);
+        double F = 0;
+        if(dist >= CONSTANT::MIN_DISTANCE_FOR_CALCULATION)
+        {
+            F = (CONSTANT::G * this->mMass * body.getMass()) / (dist*dist);
+
+            mForce.x += F * dx / dist;
+            mForce.y += F * dy / dist;
+        }
+
+        if(F > mForceStrongestAttractor)
+        {
+            mForceStrongestAttractor = F;
+            mStrongestAttractorPosition = body.getPosition();
+        }
+
+    }
+
+    void Body::resetForce()
+    {
+        mForce = sf::Vector2d(0,0);
+        mForceStrongestAttractor = 0;
+    }
+
+    void Body::absorbs(const Body& b)
+    {
+        double total_mass = mMass + b.mMass;
+        double ratio_1 = mMass / total_mass;
+    	double ratio_2 = b.mMass / total_mass;
+
+        sf::Vector2d pos_1(getPosition()), pos_2(b.getPosition());
+        auto velocity   = ratio_1 * mVelocity + ratio_2 * b.mVelocity;
+
+        mMass = total_mass;
+        mVelocity = velocity;
+
+        calculateRadius();
+        mBody.setRadius(mRadius);
+        utils::centerOrigin<sf::CircleShape>(mBody);
+    }
+
     double Body::distanceTo(const Body& body) const
     {
         double dx = getPosition().x - body.getPosition().x;
@@ -46,31 +102,13 @@ namespace Celestial
         return std::sqrt(dx*dx + dy*dy);
     }
 
-    void Body::addForce(const Body& body)
-    {
-        double dx = body.getPosition().x - getPosition().x;
-        double dy = body.getPosition().y - getPosition().y;
-        double dist = std::sqrt(dx*dx + dy*dy);
-
-        if(dist >= 10*std::numeric_limits<double>().epsilon())
-        {
-            double F = (CONSTANT::G * this->mMass * body.getMass()) / (dist*dist);
-
-            mForce.x += F * dx / dist;
-            mForce.y += F * dy / dist;
-        }
-
-    }
 
     bool Body::hasCollidedWith(const Body &body) const
     {
         return distanceTo(body) < mRadius + body.mRadius;
     }
 
-    void Body::resetForce()
-    {
-        mForce = sf::Vector2d(0,0);
-    }
+
 
     bool Body::isInsideRocheLimitOf(const Body& Primary) const
     {
@@ -89,14 +127,29 @@ namespace Celestial
 
 ////////// Getters
 
+    sf::Color Body::getColor() const
+    {
+        return mBody.getFillColor();
+    }
+
+    double Body::getDensity() const
+    {
+        return mDensity;
+    }
+
     double Body::getMass() const
     {
         return mMass;
     }
 
-    float Body::getRadius() const
+    double Body::getRadius() const
     {
         return mRadius;
+    }
+
+    sf::Vector2f Body::getStrongestAttractorPosition() const
+    {
+        return mStrongestAttractorPosition;
     }
 
     sf::Vector2d Body::getVelocity() const
