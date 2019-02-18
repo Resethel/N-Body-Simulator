@@ -21,7 +21,6 @@ namespace Celestial
     , mouseHeldDown(false)
     , mTempBody(nullptr)
     , mSpeedVector()
-    , mTrailedBody(nullptr)
     {
         mPlanetArray.reserve(2000);
     }
@@ -159,8 +158,13 @@ namespace Celestial
 
     void Sim::reset()
     {
+        // Deleting all bodies
         mPlanetArray.clear();
         mTempBody.reset();
+
+        // Clearing the graphics
+        mTrailArray.clear();
+        mExplosionArray.clear();
 
         // resetting the counters
         mTotalMass = 0;

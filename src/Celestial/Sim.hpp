@@ -84,10 +84,9 @@ namespace Celestial
 
         sf::RenderWindow*   mLinkedWindow;
 
+        // Containers
         BodyContainer       mPlanetArray;
         ExplosionContainer  mExplosionArray;
-
-        // trail test array
         TrailContainer      mTrailArray;
 
         // Statistics
