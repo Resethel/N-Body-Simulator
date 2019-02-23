@@ -2,6 +2,7 @@
 
 > A Basic N-Body / Solar System simulator
 
+![Imgur](https://i.imgur.com/bJ85EfJ.gif)
 
 ## Building
 
