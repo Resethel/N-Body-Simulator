@@ -196,49 +196,59 @@ namespace Celestial
     		mBody.setPointCount(30);
 
     	}
-    	else if (mMass < CONSTANT::TERRESTIAL_LIMIT)
+        else if (mMass < CONSTANT::TERRESTIAL_LIMIT)
     	{
     		mDensity = 0.5;
             mBody.setFillColor(sf::Color(119,150,7));
     		mBody.setPointCount(40);
 
     	}
-    	else if (mMass < CONSTANT::GAS_GIANT_LIMIT)
+        else if (mMass < CONSTANT::GAS_GIANT_LIMIT)
     	{
     		mDensity = 0.3;
             mBody.setFillColor(sf::Color(61,87,181));
     		mBody.setPointCount(50);
 
     	}
-    	else if (mMass < CONSTANT::SMALL_STAR_LIMIT)
+        else if (mMass < CONSTANT::SMALL_STAR_LIMIT)
     	{
     		mDensity = 0.2;
             mBody.setFillColor(sf::Color(255,23,15));
     		mBody.setPointCount(90);
     	}
-    	else if (mMass < CONSTANT::STAR_LIMIT)
+        else if (mMass < CONSTANT::STAR_LIMIT)
     	{
     		mDensity = 0.15;
             mBody.setFillColor(sf::Color(255,145,15));
     		mBody.setPointCount(90);
     	}
-    	else if (mMass < CONSTANT::BIG_STAR_LIMIT)
+        else if (mMass < CONSTANT::BIG_STAR_LIMIT)
     	{
     		mDensity = 0.1;
             mBody.setFillColor(sf::Color(168,207,255));
     		mBody.setPointCount(150);
     	}
-        else
+        else // BlackHole
         {
-            mDensity = 1;
+            mDensity = INFINITY;
             mBody.setFillColor(sf::Color(30,30,30));
-    		mBody.setPointCount(15);
+            mBody.setOutlineColor(sf::Color(255,255,255));
+            mBody.setOutlineThickness(mRadius/10.f);
+    		mBody.setPointCount(25);
         }
 
 
-        // From the formula M = (4/3)*pi*R^3*density
-        //mRadius = std::cbrt((3 * mMass) / (4 * M_PI * mDensity));
-        mRadius = std::cbrt(mMass) / (mDensity);
+        if (mMass < CONSTANT::BIG_STAR_LIMIT)
+        {
+            // From the formula M = (4/3)*pi*R^3*density
+            //mRadius = std::cbrt((3 * mMass) / (4 * M_PI * mDensity));
+            mRadius = std::cbrt(mMass) / (mDensity);
+        }
+        else // BlackHole = Schwarzschild radius
+        {
+            mRadius = 2 * mMass * (CONSTANT::G/10000) / (CONSTANT::SPEED_OF_LIGHT * CONSTANT::SPEED_OF_LIGHT);
+            mRadius *= 3e16;
+        }
     }
 
 
@@ -277,7 +287,7 @@ namespace Celestial
         auto velocity   = ratio_1 * mVelocity + ratio_2 * rhs.mVelocity;
         auto position   = ratio_1 * pos_1     + ratio_2 * pos_2;
 
-        return Body(position,velocity,total_mass);
+        return {position,velocity,total_mass};
 
     }
 
