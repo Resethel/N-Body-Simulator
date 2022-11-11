@@ -5,7 +5,7 @@ project(N-Body-Simulator)
 
 # The version number.
 set(N-Body-Simulator_VERSION_MAJOR 0)
-set(N-Body-Simulator_VERSION_MINOR 2)
+set(N-Body-Simulator_VERSION_MINOR 3)
 set(N-Body-Simulator_VERSION_PATCH 0)
 
 
@@ -45,12 +45,14 @@ add_executable(
         src/Celestial/Sim.hpp
         src/Celestial/Sim.cpp
 
-    src/GFX/Effect.hpp
-    src/GFX/Effect.cpp
-    src/GFX/Explosion.hpp
-    src/GFX/Explosion.cpp
-    src/GFX/Trail.hpp
-    src/GFX/Trail.cpp
+        src/GFX/Effect.hpp
+        src/GFX/Effect.cpp
+        src/GFX/Explosion.hpp
+        src/GFX/Explosion.cpp
+        src/GFX/Light.hpp
+        src/GFX/Light.cpp
+        src/GFX/Trail.hpp
+        src/GFX/Trail.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} ${SFML_LIBRARIES} ${SFML_DEPENDENCIES} ${ADDITIONAL_LINK_FLAGS})

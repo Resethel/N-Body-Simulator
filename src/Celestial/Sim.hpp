@@ -19,6 +19,7 @@
 #include "../Constant.hpp"
 #include "../Utils.hpp"
 #include "../GFX/Explosion.hpp"
+#include "../GFX/Light.hpp"
 #include "Body.hpp"
 
 #include "../GFX/Trail.hpp"
@@ -36,6 +37,7 @@ namespace Celestial
         typedef std::vector<Body::Ptr>      BodyContainer;
         typedef std::vector<gfx::Explosion> ExplosionContainer;
         typedef std::vector<gfx::Trail>     TrailContainer;
+        typedef std::vector<gfx::Light>     LightContainer;
 
     public:
         // Constructor
@@ -66,8 +68,10 @@ namespace Celestial
         void        enableBoundary(const bool& activate);
 
         //// for Graphical Effects
-        void    addExplosion(gfx::Explosion& expl);
-        void    removeExplosion(const size_t& ind);
+        void        addStarLight(gfx::Light& light);
+        void        removeStarLight(const size_t& ind);
+        void        addExplosion(gfx::Explosion& expl);
+        void        removeExplosion(const size_t& ind);
 
         // getters
 
@@ -77,14 +81,12 @@ namespace Celestial
         unsigned long long  getSimulationStep() const;
 
 
-
-
     protected:
         // Internal handling
         void    physicalResolution();
         void    effectsResolution();
 
-        void    dislocateBody(const int& ind);
+        void    explodeCelestialBody(const int& ind);
 
     private:
 
@@ -94,6 +96,7 @@ namespace Celestial
         BodyContainer               mPlanetArray;
         ExplosionContainer          mExplosionArray;
         TrailContainer              mTrailArray;
+        LightContainer              mLightArray;
         Celestial::Boundary::Ptr    mBoundary;
 
         // Statistics

@@ -143,6 +143,12 @@ namespace Celestial
             mLinkedWindow->draw(*b);
         }
 
+        // 1st: Draw the light of the stars
+        for(auto& light : mLightArray)
+        {
+            mLinkedWindow->draw(light);
+        }
+
         // drawing explosions
         for(auto& expl : mExplosionArray)
         {
@@ -221,7 +227,13 @@ namespace Celestial
         if(update_mass)
             mTotalMass += b.getMass();
 
-        mPlanetArray.push_back(std::make_shared<Body>(b));
+        auto body = std::make_shared<Body>(b);
+        mPlanetArray.push_back(body);
+
+        // Add a light to the body
+        gfx::Light bodyLight;
+        bodyLight.linkTo(body);
+        mLightArray.push_back(bodyLight);
     }
 
     void Sim::addCelestialBody(double x, double y, double vel_x, double vel_y, double mass, bool update_mass)
@@ -230,7 +242,13 @@ namespace Celestial
         if(update_mass)
             mTotalMass += mass;
 
-        mPlanetArray.emplace_back(std::make_shared<Body>(x, y, vel_x, vel_y, mass));
+        auto body = std::make_shared<Body>(x, y, vel_x, vel_y, mass);
+        mPlanetArray.emplace_back(body);
+
+        // Add a light to the body
+        gfx::Light bodyLight;
+        bodyLight.linkTo(body);
+        mLightArray.push_back(bodyLight);
     }
 
     void Sim::removeCelestialBody(const size_t& ind, bool update_mass)
@@ -267,8 +285,6 @@ namespace Celestial
 	    {
             vel = sf::Vector2d(0,0);
             angle = angleDistribution(generator);
-
-
 
             x = center_x + cos(angle/(2 * M_PI)) * (offset + radiusDistribution(generator));
             y = center_y + sin(angle/(2 * M_PI)) * (offset + radiusDistribution(generator));
@@ -360,6 +376,19 @@ namespace Celestial
 
 	    *it = std::move(mExplosionArray.back());
 	    mExplosionArray.pop_back();
+    }
+
+    void Sim::addStarLight(gfx::Light& light)
+    {
+        mLightArray.push_back(std::move(light));
+    }
+
+    void Sim::removeStarLight(const size_t& ind)
+    {
+        auto it = mLightArray.begin() + ind;
+
+        *it = std::move(mLightArray.back());
+        mLightArray.pop_back();
     }
 
 
@@ -495,6 +524,19 @@ namespace Celestial
 
     void Sim::effectsResolution()
     {
+        // Lights
+        for(size_t i(0) ; i < mLightArray.size() ; ++i )
+        {
+            if(mLightArray[i].isDestroyed())
+            {
+                removeStarLight(i);
+            }
+            else
+            {
+                mLightArray[i].update();
+            }
+        }
+
         // EXPLOSIONS
 
         for(size_t i(0) ; i < mExplosionArray.size() ; ++i )
