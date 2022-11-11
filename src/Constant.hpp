@@ -13,8 +13,8 @@ namespace CONSTANT
 {
     // Gravitational Constant
     const double REAL_G = 6.673e-11;
-    const double G = 6.673e1;
-    const double SPEED_OF_LIGHT = 299792458.;
+    const double G = REAL_G * 1e11;
+    const double SPEED_OF_LIGHT = 299792458;  // in m/s
 
     // Calculation constants
     const double MIN_DISTANCE_FOR_CALCULATION = 10 * std::numeric_limits<double>::epsilon();
@@ -31,16 +31,23 @@ namespace CONSTANT
     // COLLISIONS
     const double COLLISION_ABSORPTION_RATIO = 1.01;
 
-    // ROCHE_LIMIT
+    // ROCHE LIMIT
     const double ROCHE_LIMIT_MULTIPLIER = 4.6; // Multiplier for simulation
     const double ROCHE_LIMIT_MIN_MASS_RATIO = 0.4; // Minimum mass ratio for tidal force to rip a celestial body
-    const double ROCHE_LIMIT_SPEED_MULTIPLIER = 3; // adjust explosion speed on roche limit explosion
 
-    // EXPLOSIONS, BREAKING, ETC
-    const double MINIMUM_MASS_FOR_DIVISION = 3;
-    const double EXPLOSION_FLASH_SIZE = 10;
-    const double EXPLOSION_LIGHT_STRENGTH = 50;
-    const size_t EXPLOSION_POINT_COUNT = 50;
+    // PLANET EXPLOSION
+    const double EXPLOSION_PLANET_SPEED_MULTIPLIER  = 1.05; // adjust explosion speed on regular
+    const double EXPLOSION_ROCHE_SPEED_MULTIPLIER   = 0.98; // adjust explosion speed on roche limit explosion
+
+    // SCHWARZSCHILD RADIUS MULTIPLIER
+    const double SCHWARZSCHILD_MULTIPLIER   = 0.001;
+
+    // GFX: EXPLOSIONS, BREAKING, ETC
+    const double MINIMUM_MASS_FOR_DIVISION  = 3;
+    const double EXPLOSION_FLASH_SIZE       = 10;
+    const double EXPLOSION_LIGHT_STRENGTH   = 50;
+    const size_t EXPLOSION_POINT_COUNT      = 50;
+
 
     // BOUNDARIES
     const double DEFAULT_BOUNDARY_RADIUS = 1e4;
@@ -49,7 +56,9 @@ namespace CONSTANT
     const double TRAIL_FADE_RATIO = 0.3;
 
     // GUI
-    const double VELOCITY_LINE_MULTIPLIER = 2.5;
+    const float ZOOM_INCREMENT              = 0.1f;
+    const float TIMESTEP_INCREMENT          = 0.5f;
+    const double VELOCITY_LINE_MULTIPLIER   = 2.5;
 
     // OTHER
     const float  SLINGSHOT_MULTIPLIER = 2.5;

@@ -86,7 +86,7 @@ namespace Celestial
         void    physicalResolution();
         void    effectsResolution();
 
-        void    explodeCelestialBody(const int& ind);
+        void    explodeCelestialBody(const int& ind, bool rocheExplosion = false);
 
     private:
 

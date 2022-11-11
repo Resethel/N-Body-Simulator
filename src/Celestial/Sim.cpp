@@ -307,34 +307,34 @@ namespace Celestial
     {
         double systemMass = CONSTANT::MASS_MULTIPLIER * std::cbrt(radius);
 
-        double speedMultiplier = 0.00000085 * utils::rand(120*systemMass, 150*systemMass);
+        double speedMultiplier = 4.35e-7 * utils::rand(120*systemMass, 150*systemMass);
 
         double angle        = 0;
-        double deltaAngle   = 2 * M_PI / numberOfObjects;
+        double deltaAngle   = 2 * M_PI / static_cast<float>(numberOfObjects);
         double massOfCenter = utils::rand(systemMass / 3 , systemMass / 2);
         systemMass -= massOfCenter;
 
         Celestial::Body centerPlanet(centerX, centerY, 0, 0, massOfCenter);
         this->addCelestialBody(centerPlanet, true);
 
-        for (int i = 0; i < numberOfObjects; i++, angle += deltaAngle)
+        for (int i = 0; i < numberOfObjects; i++ , angle += deltaAngle)
         {
-            double mass = utils::rand(0.6* systemMass /numberOfObjects, 1.4*systemMass /numberOfObjects);
+            double mass = utils::rand(0.6 * systemMass / static_cast<float>(numberOfObjects),
+                                      1.4 * systemMass / static_cast<float>(numberOfObjects));
 
-            double radius2 = utils::rand(2*centerPlanet.getRadius() , (double) radius);
-            double randomelement1 = utils::rand(-speedMultiplier*0.5, speedMultiplier*0.5);
-            double randomelement2 = utils::rand(-speedMultiplier*0.5, speedMultiplier*0.5);
+            double radius2          = utils::rand(2 * centerPlanet.getRadius() , (double) radius);
+            double randomElement1   = utils::rand(-speedMultiplier * 0.5       , speedMultiplier * 0.5);
+            double randomElement2   = utils::rand(-speedMultiplier * 0.5       , speedMultiplier * 0.5);
 
             double x = cos(angle) * radius2;
             double y = sin(angle) * radius2;
-            double vx = 50*(speedMultiplier*cos(angle + 1.507) + randomelement1);
-            double vy = 50*(speedMultiplier*sin(angle + 1.507) + randomelement2);
+            double vx = 50 * (speedMultiplier * cos(angle + 1.507) + randomElement1);
+            double vy = 50 * (speedMultiplier * sin(angle + 1.507) + randomElement2);
 
             this->addCelestialBody(centerX + x, centerY + y, vx, vy, mass);
         }
 
     }
-
 
     void Sim::enableBoundary(const bool& activate)
     {
@@ -416,7 +416,6 @@ namespace Celestial
         return {x / totalMass, y / totalMass};
     }
 
-
     double Sim::getTotalMass() const
     {
         return mTotalMass;
@@ -462,8 +461,8 @@ namespace Celestial
                         {
                             gfx::Explosion expl(a->getPosition());
                             addExplosion(expl);
-                            explodeCelestialBody(first);
-                            break; // we exit the loop as the planet doenst really exist anymore
+                            explodeCelestialBody(first, true);
+                            break; // we exit the loop as the planet doesn't really exist anymore
                         }
                         // Check for collision
                         else if( (*a) != (*b) and a->hasCollidedWith(*b))
@@ -480,7 +479,7 @@ namespace Celestial
                             double massRatio = a->getMass() / b->getMass();
                             massRatio = (massRatio > 1 )? 1/massRatio : massRatio;
 
-
+                            // Resolve collisions where one body should absorb another
                             if(massRatio < CONSTANT::COLLISION_ABSORPTION_RATIO)
                             {
                                 if(a->getMass() > b->getMass())
@@ -494,7 +493,7 @@ namespace Celestial
                                     removeCelestialBody(first,false);
                                 }
                             }
-                            else
+                            else // Merge the two bodies into a new one
                             {
                                 // Create the resulting fused Body.
                                 auto fusion = ((*a) + (*b));
@@ -567,24 +566,27 @@ namespace Celestial
         }
     }
 
-    void Sim::explodeCelestialBody(const int& ind)
+    void Sim::explodeCelestialBody(const int& ind,  bool rocheExplosion)
     {
         if (!mPlanetArray.empty())
 	    {
-    		double amount = utils::rand<int>(4, 8);
-    		double mass   = mPlanetArray[ind]->getMass();
-    		auto pos      = mPlanetArray[ind]->getPosition();
-            auto vel      = mPlanetArray[ind]->getVelocity();
-    		double radius = mPlanetArray[ind]->getRadius();
+    		int amount          = utils::rand<int>(4, 8);
+    		double mass         = mPlanetArray[ind]->getMass();
+    		sf::Vector2f pos    = mPlanetArray[ind]->getPosition();
+            sf::Vector2d vel    = mPlanetArray[ind]->getVelocity();
+    		double radius       = mPlanetArray[ind]->getRadius();
+    		double angle        = 0;
 
-    		double angle = 0;
+            // Set the speed multiplier
+            double speedMultiplier = rocheExplosion ? CONSTANT::ROCHE_LIMIT_MULTIPLIER
+                                                    : CONSTANT::EXPLOSION_PLANET_SPEED_MULTIPLIER;
 
-    		for(size_t i(0); i < amount; ++i)
+            for(size_t i(0); i < amount; ++i)
     		{
                 Body Q(   pos.x + 3 * cos(angle)  * std::cbrt(radius)
                         , pos.y + 3 * sin(angle)  * std::cbrt(radius)
-                        , vel.x + std::sqrt(mass) * cos(angle) * CONSTANT::ROCHE_LIMIT_SPEED_MULTIPLIER
-                        , vel.y + std::sqrt(mass) * sin(angle) * CONSTANT::ROCHE_LIMIT_SPEED_MULTIPLIER
+                        , vel.x + std::sqrt(mass) * cos(angle) * speedMultiplier
+                        , vel.y + std::sqrt(mass) * sin(angle) * speedMultiplier
                         , mass/amount);
 
                 angle += 2 * M_PI / amount;

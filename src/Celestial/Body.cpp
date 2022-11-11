@@ -53,20 +53,20 @@ namespace Celestial
     {
         double dx = body.getPosition().x - getPosition().x;
         double dy = body.getPosition().y - getPosition().y;
+        double angle = atan2(dy, dx);
         double dist = std::sqrt(dx*dx + dy*dy);
-        double F = 0;
+        double F;
         if(dist >= CONSTANT::MIN_DISTANCE_FOR_CALCULATION)
         {
             F = (CONSTANT::G * this->mMass * body.getMass()) / (dist*dist);
-
-            mForce.x += F * dx / dist;
-            mForce.y += F * dy / dist;
+            mForce.x += F * cos(angle);
+            mForce.y += F * sin(angle);
         }
         else
         {
             F = 1 / std::sqrt(dist*dist + CONSTANT::SOFTENING_FACTOR * CONSTANT::SOFTENING_FACTOR);
-            mForce.x += F * dx / dist;
-            mForce.y += F * dy / dist;
+            mForce.x += F * cos(angle);
+            mForce.y += F * sin(angle);
         }
 
         if(F > mForceStrongestAttractor)
@@ -85,9 +85,9 @@ namespace Celestial
 
     void Body::absorbs(const Body& b)
     {
-        double total_mass = mMass + b.mMass;
-        double ratio_1 = mMass / total_mass;
-    	double ratio_2 = b.mMass / total_mass;
+        double total_mass   = mMass + b.mMass;
+        double ratio_1      = mMass / total_mass;
+    	double ratio_2      = b.mMass / total_mass;
 
         sf::Vector2d pos_1(getPosition()), pos_2(b.getPosition());
         auto velocity   = ratio_1 * mVelocity + ratio_2 * b.mVelocity;
@@ -95,8 +95,8 @@ namespace Celestial
         mMass = total_mass;
         mVelocity = velocity;
 
-        calculateRadius();
-        mBody.setRadius(mRadius);
+        this->calculateRadius();
+        mBody.setRadius(static_cast<float>(mRadius));
         utils::centerOrigin<sf::CircleShape>(mBody);
     }
 
@@ -121,9 +121,9 @@ namespace Celestial
         bool isInside(false);
 
         if((this->mMass < Primary.mMass)
-        && (this->mMass / Primary.mMass < CONSTANT::ROCHE_LIMIT_MIN_MASS_RATIO)
-        && (distanceTo(Primary) < rocheLimit(Primary, *this))
-        && (this->mMass > CONSTANT::MINIMUM_MASS_FOR_DIVISION))
+            and (this->mMass / Primary.mMass < CONSTANT::ROCHE_LIMIT_MIN_MASS_RATIO)
+            and (distanceTo(Primary) < rocheLimit(Primary, *this))
+            and (this->mMass > CONSTANT::MINIMUM_MASS_FOR_DIVISION))
         {
             isInside = true;
         }
@@ -252,8 +252,9 @@ namespace Celestial
         }
         else // BlackHole = Schwarzschild radius
         {
-            mRadius = 2 * mMass * (CONSTANT::G/10000) / (CONSTANT::SPEED_OF_LIGHT * CONSTANT::SPEED_OF_LIGHT);
+            mRadius = 2 * mMass * (CONSTANT::G) / (CONSTANT::SPEED_OF_LIGHT * CONSTANT::SPEED_OF_LIGHT);
             mRadius *= 3e16;
+            mRadius *= CONSTANT::SCHWARZSCHILD_MULTIPLIER; // Add a multiplier to keep the aspect correct
         }
     }
 

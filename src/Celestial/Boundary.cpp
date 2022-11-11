@@ -42,7 +42,7 @@ namespace Celestial
     void Boundary::setRadius(const double &radius)
     {
         mBody.setRadius(radius);
-        mBody.setOrigin(radius, radius);
+        utils::centerOrigin<sf::CircleShape>(this->mBody);
     }
 
 ////////// Draw

@@ -77,7 +77,7 @@ void Core::run()
     unsigned updateRealised;
 
 //    mSimulator.populate(1000,800,600,1500);
-    mSimulator.generateSystem(1000, 800, CONSTANT::NUMBER_OF_OBJECT_MULTIPLIER*1000, 1000);
+    mSimulator.generateSystem(1000, 800, 2000, 350);
 
     // Run the program as long as the window is open
     while (mMainWindow.isOpen())
@@ -195,14 +195,6 @@ void Core::processInput()
                         mSimulator.run();
                 break;
 
-                case sf::Keyboard::Up:
-                    mTimeStepMultiplier = utils::clamp<float>(mTimeStepMultiplier+0.5f, 0.5, 50);
-                break;
-
-                case sf::Keyboard::Down:
-                    mTimeStepMultiplier = utils::clamp<float>(mTimeStepMultiplier-0.5f, 0.5, 50);
-                break;
-
                 // Toggle Help Status
                 case sf::Keyboard::B:
                     if (mSimulator.isBoundaryEnabled())
@@ -236,6 +228,27 @@ void Core::processInput()
                 break;
             }
 
+        }
+
+        if (event.type == sf::Event::KeyPressed)
+        {
+            switch (event.key.code)
+            {
+                case sf::Keyboard::Up:
+                    mTimeStepMultiplier = utils::clamp<float>(mTimeStepMultiplier + CONSTANT::TIMESTEP_INCREMENT,
+                                                              0.5,
+                                                              50);
+                break;
+
+                case sf::Keyboard::Down:
+                    mTimeStepMultiplier = utils::clamp<float>(mTimeStepMultiplier - CONSTANT::TIMESTEP_INCREMENT,
+                                                              0.5,
+                                                              50);
+                break;
+
+                default:
+                    break;
+            }
         }
 
 
@@ -320,9 +333,9 @@ void Core::processInput()
 
                 // Determine the scroll direction and adjust the zoom level
                 if (event.mouseWheelScroll.delta <= -1)
-                    zoom = std::min(10.f, zoom + .05f);
+                    zoom = std::min(10.f, zoom + CONSTANT::ZOOM_INCREMENT);
                 else if (event.mouseWheelScroll.delta >= 1)
-                    zoom = std::max(.1f, zoom - .05f);
+                    zoom = std::max(.1f, zoom - CONSTANT::ZOOM_INCREMENT);
 
                 // Update our view
                 view.setSize(mMainWindow.getDefaultView().getSize()); // Reset the size
@@ -368,7 +381,7 @@ void Core::render()
     // Rendering the simulation
     mSimulator.render();
 
-    // Drawing overlay informations
+    // Drawing overlay information
     auto v = mMainWindow.getView();
     mMainWindow.setView(mMainWindow.getDefaultView());
 
