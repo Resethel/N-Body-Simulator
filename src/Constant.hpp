@@ -14,10 +14,11 @@ namespace CONSTANT
     // Gravitational Constant
     const double REAL_G = 6.673e-11;
     const double G = 6.673e1;
+    const double SPEED_OF_LIGHT = 299792458.;
 
     // Calculation constants
-
-    const double MIN_DISTANCE_FOR_CALCULATION = 10 * std::numeric_limits<double>().epsilon();
+    const double MIN_DISTANCE_FOR_CALCULATION = 10 * std::numeric_limits<double>::epsilon();
+    const double SOFTENING_FACTOR             = std::numeric_limits<double>::epsilon();
 
     // BODY_TYPE_MASS
     const double ROCKY_LIMIT        = 15;
@@ -28,13 +29,12 @@ namespace CONSTANT
     const double BIG_STAR_LIMIT     = 3500;
 
     // COLLISIONS
-
     const double COLLISION_ABSORPTION_RATIO = 1.01;
 
     // ROCHE_LIMIT
     const double ROCHE_LIMIT_MULTIPLIER = 4.6; // Multiplier for simulation
-    const double ROCHE_LIMIT_MIN_MASS_RATIO = 0.4; // Minimum mass ration for tidal force to rip a celestial body
-    const double ROCHE_LIMIT_SPEED_MULTIPLIER = 3; // adjust explosion speed on roche limite explosion
+    const double ROCHE_LIMIT_MIN_MASS_RATIO = 0.4; // Minimum mass ratio for tidal force to rip a celestial body
+    const double ROCHE_LIMIT_SPEED_MULTIPLIER = 3; // adjust explosion speed on roche limit explosion
 
     // EXPLOSIONS, BREAKING, ETC
     const double MINIMUM_MASS_FOR_DIVISION = 3;

@@ -62,6 +62,12 @@ namespace Celestial
             mForce.x += F * dx / dist;
             mForce.y += F * dy / dist;
         }
+        else
+        {
+            F = 1 / std::sqrt(dist*dist + CONSTANT::SOFTENING_FACTOR * CONSTANT::SOFTENING_FACTOR);
+            mForce.x += F * dx / dist;
+            mForce.y += F * dy / dist;
+        }
 
         if(F > mForceStrongestAttractor)
         {
