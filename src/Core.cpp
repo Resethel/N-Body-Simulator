@@ -76,8 +76,8 @@ void Core::run()
 
     unsigned updateRealised;
 
-    mSimulator.populate(1000,800,600,1500);
-
+//    mSimulator.populate(1000,800,600,1500);
+    mSimulator.generateSystem(1000, 800, CONSTANT::NUMBER_OF_OBJECT_MULTIPLIER*1000, 1000);
 
     // Run the program as long as the window is open
     while (mMainWindow.isOpen())
@@ -175,7 +175,7 @@ void Core::update(sf::Time dt)
 void Core::processInput()
 {
     // Check all the window's events that were triggered since the last iteration of the loop
-    sf::Event event;
+    sf::Event event{};
     while (mMainWindow.pollEvent(event))
     {
         // "close requested" event: we close the window
@@ -196,16 +196,19 @@ void Core::processInput()
                 break;
 
                 case sf::Keyboard::Up:
-                    mTimeStepMultiplier = utils::clamp<float>(mTimeStepMultiplier+0.5f, 0.5, 10);
+                    mTimeStepMultiplier = utils::clamp<float>(mTimeStepMultiplier+0.5f, 0.5, 50);
                 break;
 
                 case sf::Keyboard::Down:
-                    mTimeStepMultiplier = utils::clamp<float>(mTimeStepMultiplier-0.5f, 0.5, 100);
+                    mTimeStepMultiplier = utils::clamp<float>(mTimeStepMultiplier-0.5f, 0.5, 50);
                 break;
 
-                // Resets the simulation
-                case sf::Keyboard::R:
-                    mSimulator.reset();
+                // Toggle Help Status
+                case sf::Keyboard::B:
+                    if (mSimulator.isBoundaryEnabled())
+                        mSimulator.enableBoundary(false);
+                    else
+                        mSimulator.enableBoundary(true);
                 break;
 
                 // Toggle Help Status
@@ -222,6 +225,11 @@ void Core::processInput()
                         lockedOnBody = selectedBody.lock();
                     else
                         lockedOnBody.reset();
+                break;
+
+                // Resets the simulation
+                case sf::Keyboard::R:
+                    mSimulator.reset();
                 break;
 
                 default:
@@ -312,7 +320,7 @@ void Core::processInput()
 
                 // Determine the scroll direction and adjust the zoom level
                 if (event.mouseWheelScroll.delta <= -1)
-                    zoom = std::min(5.f, zoom + .05f);
+                    zoom = std::min(10.f, zoom + .05f);
                 else if (event.mouseWheelScroll.delta >= 1)
                     zoom = std::max(.1f, zoom - .05f);
 

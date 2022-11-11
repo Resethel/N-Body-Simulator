@@ -22,6 +22,7 @@
 #include "Body.hpp"
 
 #include "../GFX/Trail.hpp"
+#include "Boundary.hpp"
 
 namespace Celestial
 {
@@ -41,24 +42,28 @@ namespace Celestial
         Sim(sf::RenderWindow& window);
 
         // Methods
-        // for Simulation
-        void    handleEvent(const sf::Event& event);
-        void    update(sf::Time dt);
-        void    render() const;
+        //// for Simulation
+        void        handleEvent(const sf::Event& event);
+        void        update(sf::Time dt);
+        void        render() const;
 
-        void    run();
-        void    stop();
-        void    reset();
-        bool    isRunning() const;
+        void        run();
+        void        stop();
+        void        reset();
+        bool        isRunning() const;
 
         std::weak_ptr<const Body> getBodyAtPosition(sf::Vector2f pos) const;
 
-        //// for Celestial bodies
-        void    addCelestialBody(const Body& b, bool update_mass = true);
-        void    addCelestialBody(double x, double y, double vel_x, double vel_y, double mass, bool update_mass = true);
-        void    removeCelestialBody(const size_t& ind, bool update_mass = true);
+        //// for Celestial Bodies
+        void        addCelestialBody(const Body& b, bool update_mass = true);
+        void        addCelestialBody(double x, double y, double vel_x, double vel_y, double mass, bool update_mass = true);
+        void        removeCelestialBody(const size_t& ind, bool update_mass = true);
 
-        void    populate(size_t number, int center_x, int center_y, int radius);
+        void        populate(size_t number, double center_x, double center_y, int radius);
+        void        generateSystem(double centerX, double centerY, size_t numberOfObjects, int radius);
+
+        inline bool isBoundaryEnabled() const {return mBoundActive;};
+        void        enableBoundary(const bool& activate);
 
         //// for Graphical Effects
         void    addExplosion(gfx::Explosion& expl);
@@ -68,6 +73,7 @@ namespace Celestial
 
         unsigned            getBodyCount() const;
         double              getTotalMass() const;
+        sf::Vector2d        getCenterOfMass() const;
         unsigned long long  getSimulationStep() const;
 
 
@@ -82,24 +88,26 @@ namespace Celestial
 
     private:
 
-        sf::RenderWindow*   mLinkedWindow;
+        sf::RenderWindow*           mLinkedWindow;
 
         // Containers
-        BodyContainer       mPlanetArray;
-        ExplosionContainer  mExplosionArray;
-        TrailContainer      mTrailArray;
+        BodyContainer               mPlanetArray;
+        ExplosionContainer          mExplosionArray;
+        TrailContainer              mTrailArray;
+        Celestial::Boundary::Ptr    mBoundary;
 
         // Statistics
-        unsigned            mBodyCount;
-        double              mTotalMass;
-        unsigned long long  mSimulationStep;
+        unsigned                    mBodyCount;
+        double                      mTotalMass;
+        unsigned long long          mSimulationStep;
 
-        bool                mIsRunning;
-        bool                mouseHeldDown;
+        bool                        mIsRunning;
+        bool                        mBoundActive;
+        bool                        mouseHeldDown;
 
         // Temporary celestial Body
-        Body::Ptr           mTempBody;
-        sf::Vertex          mSpeedVector[2];
+        Body::Ptr                   mTempBody;
+        sf::Vertex                  mSpeedVector[2];
 
     };
 

@@ -42,6 +42,9 @@ namespace CONSTANT
     const double EXPLOSION_LIGHT_STRENGTH = 50;
     const size_t EXPLOSION_POINT_COUNT = 50;
 
+    // BOUNDARIES
+    const double DEFAULT_BOUNDARY_RADIUS = 1e4;
+
     // Graphics
     const double TRAIL_FADE_RATIO = 0.3;
 
@@ -50,6 +53,10 @@ namespace CONSTANT
 
     // OTHER
     const float  SLINGSHOT_MULTIPLIER = 2.5;
+
+    //SYSTEM GENERATOR
+    const double MASS_MULTIPLIER = 130;
+    const double NUMBER_OF_OBJECT_MULTIPLIER = 0.4;
 }
 
 #endif // CONSTANT_HPP

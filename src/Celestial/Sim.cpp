@@ -21,6 +21,8 @@ namespace Celestial
     , mouseHeldDown(false)
     , mTempBody(nullptr)
     , mSpeedVector()
+    , mBoundActive(false)
+    , mBoundary(nullptr)
     {
         mPlanetArray.reserve(2000);
     }
@@ -95,6 +97,14 @@ namespace Celestial
     {
         if(isRunning() and !mPlanetArray.empty())
         {
+            // Update the boundary
+            if (mBoundActive)
+            {
+                auto cm = this->getCenterOfMass();
+                mBoundary->setPosition(cm.x, cm.y);
+                mBoundary->setRadius(CONSTANT::DEFAULT_BOUNDARY_RADIUS); // TODO: Replace by dynamic bound
+            }
+
             // Handling collisions, roche limit and force update
             std::thread phy_res_thread(&Sim::physicalResolution, this);
 
@@ -105,8 +115,8 @@ namespace Celestial
             for (size_t i(0) ; i < mPlanetArray.size(); ++i)
             {
                 body = mPlanetArray[i];
-                if(!body.expired())
-                    body.lock()->update(dt);
+                if(auto bodyLock = body.lock())
+                    bodyLock->update(dt);
             }
 
             //joining back the threads
@@ -137,6 +147,12 @@ namespace Celestial
         for(auto& expl : mExplosionArray)
         {
             mLinkedWindow->draw(expl);
+        }
+
+        // Drawing the Boundary
+        if(mBoundActive)
+        {
+            mLinkedWindow->draw(*mBoundary);
         }
 
         if(mouseHeldDown and mTempBody)
@@ -229,7 +245,7 @@ namespace Celestial
 	    mPlanetArray.pop_back();
     }
 
-    void Sim::populate(size_t number, int center_x, int center_y, int radius)
+    void Sim::populate(size_t number, double center_x, double center_y, int radius)
     {
         mPlanetArray.clear();
 
@@ -238,12 +254,12 @@ namespace Celestial
 
         std::mt19937 generator;
         generator.seed(std::random_device()());
-	    std::uniform_int_distribution<double> massDistribution(0.1, 5);
+	    std::uniform_int_distribution<double> massDistribution(0.1, 10);
 	    std::uniform_int_distribution<int> angleDistribution(0, 360);
 	    std::uniform_int_distribution<int> radiusDistribution(0, radius - offset);
 
-        int x, y, norm;
-        float angle;
+        double x, y, norm;
+        double angle;
         sf::Vector2d vel;
 
 
@@ -263,14 +279,72 @@ namespace Celestial
             {
                 vel = utils::normalize<double>(x - center_x, y - center_y);
                 vel = sf::Vector2d(-vel.y, vel.x);
-                vel.x *= 2000/ radius * (1 - norm/radius);
-                vel.y *= 2000/ radius * (1 - norm/radius);
+                vel.x *= 20000 / radius * (1 - norm/radius);
+                vel.y *= 20000 / radius * (1 - norm/radius);
             }
 
 		    addCelestialBody(x, y, vel.x, vel.y, massDistribution(generator));
 	    }
     }
 
+    void Sim::generateSystem(double centerX, double centerY, size_t numberOfObjects, int radius)
+    {
+        double systemMass = CONSTANT::MASS_MULTIPLIER * std::cbrt(radius);
+
+        double speedMultiplier = 0.00000085 * utils::rand(120*systemMass, 150*systemMass);
+
+        double angle        = 0;
+        double deltaAngle   = 2 * M_PI / numberOfObjects;
+        double massOfCenter = utils::rand(systemMass / 3 , systemMass / 2);
+        systemMass -= massOfCenter;
+
+        Celestial::Body centerPlanet(centerX, centerY, 0, 0, massOfCenter);
+        this->addCelestialBody(centerPlanet, true);
+
+        for (int i = 0; i < numberOfObjects; i++, angle += deltaAngle)
+        {
+            double mass = utils::rand(0.6* systemMass /numberOfObjects, 1.4*systemMass /numberOfObjects);
+
+            double radius2 = utils::rand(2*centerPlanet.getRadius() , (double) radius);
+            double randomelement1 = utils::rand(-speedMultiplier*0.5, speedMultiplier*0.5);
+            double randomelement2 = utils::rand(-speedMultiplier*0.5, speedMultiplier*0.5);
+
+            double x = cos(angle) * radius2;
+            double y = sin(angle) * radius2;
+            double vx = 50*(speedMultiplier*cos(angle + 1.507) + randomelement1);
+            double vy = 50*(speedMultiplier*sin(angle + 1.507) + randomelement2);
+
+            this->addCelestialBody(centerX + x, centerY + y, vx, vy, mass);
+        }
+
+    }
+
+
+    void Sim::enableBoundary(const bool& activate)
+    {
+        if (activate)
+        {
+            // ignore this case
+            if (mBoundActive)
+                return ;
+            else
+            {
+                mBoundActive = true;
+                mBoundary = std::make_shared<Boundary>(getCenterOfMass(),CONSTANT::DEFAULT_BOUNDARY_RADIUS);
+            }
+        }
+        else
+        {
+            // ignore this case
+            if (!mBoundActive)
+                return ;
+            else
+            {
+                mBoundActive = false;
+                mBoundary.reset();
+            }
+        }
+    }
 
 //////////////////// for Graphical Effects
 
@@ -297,6 +371,23 @@ namespace Celestial
         return mBodyCount;
     }
 
+    sf::Vector2d Sim::getCenterOfMass() const
+    {
+        double x(0), y(0), totalMass(0);
+
+        for (const auto& p : mPlanetArray)
+        {
+            double planetMass = p->getMass();
+
+            totalMass += planetMass;
+            x += planetMass * p->getPosition().x;
+            y += planetMass * p->getPosition().y;
+        }
+
+        return {x / totalMass, y / totalMass};
+    }
+
+
     double Sim::getTotalMass() const
     {
         return mTotalMass;
@@ -316,13 +407,20 @@ namespace Celestial
         Body* a(nullptr);
         Body* b(nullptr);
 
-        // Well, there can be only collisions between at least 2 entities
+        // There can be only collisions between at least 2 entities
         if(mPlanetArray.size() > 1)
         {
             for(size_t first(0) ; first < mPlanetArray.size() ; ++first)
             {
                 a = mPlanetArray[first].get();
                 a->resetForce();
+
+                // First check if the planet is out of bound
+                if (mBoundActive and !mBoundary->isWithin(a->getPosition().x, a->getPosition().y))
+                {
+                    removeCelestialBody(first);
+                    continue;
+                }
 
                 for(size_t second(0) ; second < mPlanetArray.size() ; ++second)
                 {
@@ -335,7 +433,7 @@ namespace Celestial
                         {
                             gfx::Explosion expl(a->getPosition());
                             addExplosion(expl);
-                            dislocateBody(first);
+                            explodeCelestialBody(first);
                             break; // we exit the loop as the planet doenst really exist anymore
                         }
                         // Check for collision
@@ -412,8 +510,6 @@ namespace Celestial
         }
 
         // Trails
-
-
         for(size_t i(0) ; i < mTrailArray.size() ; ++i)
         {
             if(mTrailArray[i].isDestroyed())
@@ -429,9 +525,8 @@ namespace Celestial
         }
     }
 
-    void Sim::dislocateBody(const int& ind)
+    void Sim::explodeCelestialBody(const int& ind)
     {
-
         if (!mPlanetArray.empty())
 	    {
     		double amount = utils::rand<int>(4, 8);
@@ -459,7 +554,6 @@ namespace Celestial
             removeCelestialBody(ind);
         }
     }
-
 
 
 } // namespace Celestial
