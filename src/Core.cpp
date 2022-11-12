@@ -77,7 +77,7 @@ void Core::run()
     unsigned updateRealised;
 
 //    mSimulator.populate(1000,800,600,1500);
-    mSimulator.generateSystem(1000, 800, 2000, 350);
+    mSimulator.generateSystem(1000, 800, 1000, 350);
 
     // Run the program as long as the window is open
     while (mMainWindow.isOpen())

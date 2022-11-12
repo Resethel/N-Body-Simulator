@@ -49,14 +49,16 @@ namespace Celestial
         {
             if(mouseHeldDown and mTempBody)
             {
-                mouseHeldDown   = false;
-                auto mousePos   = mLinkedWindow->mapPixelToCoords(sf::Mouse::getPosition(*mLinkedWindow));
-                double mass     = mTempBody->getMass();
-                auto delta      = mTempBody->getPosition() - mousePos;
-                mTempBody->setVelocity(mass/100 * delta.x, mass/100 * delta.y);
+                mouseHeldDown           = false;
 
+                // Compute the velocity
+                sf::Vector2f mousePos   = mLinkedWindow->mapPixelToCoords(sf::Mouse::getPosition(*mLinkedWindow));
+                sf::Vector2f delta      = (mTempBody->getPosition() - mousePos);
+                mTempBody->setVelocity(mTempBody->getMass() * delta.x * CONSTANT::SLINGSHOT_SPEED_MULTIPLIER,
+                                       mTempBody->getMass() * delta.y * CONSTANT::SLINGSHOT_SPEED_MULTIPLIER);
+
+                // Add the celestial body
                 addCelestialBody(*mTempBody);
-
                 mTempBody.reset();
 
             }
@@ -65,12 +67,11 @@ namespace Celestial
 
 
         // Drawing the velocity vector for a new body
-        if (sf::Mouse::isButtonPressed(sf::Mouse::Left)
-            and mTempBody)
+        if (sf::Mouse::isButtonPressed(sf::Mouse::Left) and mTempBody)
         {
             auto pos        = mTempBody->getPosition();
             auto mousePos   = mLinkedWindow->mapPixelToCoords(sf::Mouse::getPosition(*mLinkedWindow));
-            auto delta      = (pos - mousePos) * CONSTANT::SLINGSHOT_MULTIPLIER;
+            auto delta      = (pos - mousePos) * CONSTANT::SLINGSHOT_DRAW_MULTIPLIER;
             mSpeedVector[0] = sf::Vertex(pos, sf::Color::Red);
             mSpeedVector[1] = sf::Vertex(pos + delta , sf::Color::Red);
 
@@ -578,7 +579,7 @@ namespace Celestial
     		double angle        = 0;
 
             // Set the speed multiplier
-            double speedMultiplier = rocheExplosion ? CONSTANT::ROCHE_LIMIT_MULTIPLIER
+            double speedMultiplier = rocheExplosion ? CONSTANT::EXPLOSION_ROCHE_SPEED_MULTIPLIER
                                                     : CONSTANT::EXPLOSION_PLANET_SPEED_MULTIPLIER;
 
             for(size_t i(0); i < amount; ++i)

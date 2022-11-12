@@ -163,6 +163,31 @@ namespace Celestial
         return mVelocity;
     }
 
+    Body::Type Body::getType() const
+    {
+        Type bType = UNDEFINED;
+
+        if (mMass < CONSTANT::ROCKY_LIMIT)
+            bType = ROCKY;
+
+        else if (mMass <= CONSTANT::GAS_GIANT_LIMIT)
+            bType = GAS_GIANT;
+
+        else if (mMass <= CONSTANT::SMALL_STAR_LIMIT)
+            bType = SMALL_STAR;
+
+        else if (mMass <= CONSTANT::STAR_LIMIT)
+            bType = MEDIUM_STAR;
+
+        else if (mMass <= CONSTANT::BIG_STAR_LIMIT)
+            bType = BIG_STAR;
+
+        else
+            bType = BLACK_HOLE;
+
+        return bType;
+    }
+
 ////////// Setters
 
     void Body::setColor(const sf::Color& color)
@@ -194,53 +219,54 @@ namespace Celestial
     {
         // We first set the density regarding the mass:
 
-        if (mMass < CONSTANT::ROCKY_LIMIT)
+        switch (this->getType())
     	{
-    		mDensity = 0.5;
-            mBody.setFillColor(sf::Color(113,111,122));
-    		mBody.setOutlineThickness(0);
-    		mBody.setPointCount(30);
+            case ROCKY:
+                mDensity = 0.5;
+                mBody.setFillColor(sf::Color(113,111,122));
+                mBody.setOutlineThickness(0);
+                mBody.setPointCount(30);
+            break;
 
-    	}
-        else if (mMass < CONSTANT::TERRESTIAL_LIMIT)
-    	{
-    		mDensity = 0.5;
-            mBody.setFillColor(sf::Color(119,150,7));
-    		mBody.setPointCount(40);
+            case TERRESTIAL:
+                mDensity = 0.5;
+                mBody.setFillColor(sf::Color(119,150,7));
+                mBody.setPointCount(40);
+            break;
 
-    	}
-        else if (mMass < CONSTANT::GAS_GIANT_LIMIT)
-    	{
-    		mDensity = 0.3;
-            mBody.setFillColor(sf::Color(61,87,181));
-    		mBody.setPointCount(50);
+            case GAS_GIANT:
+                mDensity = 0.3;
+                mBody.setFillColor(sf::Color(61,87,181));
+                mBody.setPointCount(50);
+            break;
 
-    	}
-        else if (mMass < CONSTANT::SMALL_STAR_LIMIT)
-    	{
-    		mDensity = 0.2;
-            mBody.setFillColor(sf::Color(255,23,15));
-    		mBody.setPointCount(90);
-    	}
-        else if (mMass < CONSTANT::STAR_LIMIT)
-    	{
-    		mDensity = 0.15;
-            mBody.setFillColor(sf::Color(255,145,15));
-    		mBody.setPointCount(90);
-    	}
-        else if (mMass < CONSTANT::BIG_STAR_LIMIT)
-    	{
-    		mDensity = 0.1;
-            mBody.setFillColor(sf::Color(168,207,255));
-    		mBody.setPointCount(150);
-    	}
-        else // BlackHole
-        {
-            mDensity = INFINITY;
-            mBody.setFillColor(sf::Color(30,30,30));
-            mBody.setOutlineColor(sf::Color(255,255,255));
-            mBody.setOutlineThickness(mRadius/10.f);
-    		mBody.setPointCount(25);
+            case SMALL_STAR:
+                mDensity = 0.2;
+                mBody.setFillColor(sf::Color(255,23,15));
+                mBody.setPointCount(90);
+            break;
+
+            case MEDIUM_STAR:
+                mDensity = 0.15;
+                mBody.setFillColor(sf::Color(255,145,15));
+                mBody.setPointCount(90);
+            break;
+
+            case BIG_STAR:
+                mDensity = 0.1;
+                mBody.setFillColor(sf::Color(168,207,255));
+                mBody.setPointCount(150);
+            break;
+
+            case BLACK_HOLE:
+                mDensity = INFINITY;
+                mBody.setFillColor(sf::Color(30,30,30));
+                mBody.setOutlineColor(sf::Color(255,255,255));
+                mBody.setOutlineThickness(mRadius/10.f);
+                mBody.setPointCount(25);
+            break;
+
+            default: break;
         }
 
 
@@ -278,6 +304,7 @@ namespace Celestial
                 and mDensity == rhs.mDensity
                 and mVelocity == rhs.mVelocity);
     }
+
     bool Body::operator!=(const Body& rhs)
     {
         return !(*this == rhs);

@@ -37,9 +37,11 @@ namespace gfx
             sf::Vertex vertex;
             sf::Color color(mColor);
 
-            // Update the light only if the body is big enough
-            if (linkedBodyPtr->getMass() >= CONSTANT::GAS_GIANT_LIMIT and
-                linkedBodyPtr->getMass() < CONSTANT::BIG_STAR_LIMIT)
+            // Update the light only if the body is a star
+            auto bodyType = linkedBodyPtr->getType();
+            if (bodyType == Celestial::Body::SMALL_STAR
+                or bodyType == Celestial::Body::MEDIUM_STAR
+                or bodyType == Celestial::Body::BIG_STAR)
             {
 
                 // update the position

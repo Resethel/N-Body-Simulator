@@ -24,10 +24,13 @@ namespace Celestial
     class Body : public sf::Transformable, public sf::Drawable
     {
     public:
-
+        // Ptr Definitions
         typedef std::shared_ptr<Body>       Ptr;
         typedef std::weak_ptr<Body>         WeakPtr;
         typedef std::weak_ptr<const Body>   ConstWeakPtr;
+
+        // Celestial Body Types
+        enum Type { UNDEFINED, ROCKY, TERRESTIAL, GAS_GIANT, SMALL_STAR, MEDIUM_STAR, BIG_STAR, BLACK_HOLE };
 
     public:
         // Constructor
@@ -52,6 +55,7 @@ namespace Celestial
         double          getDensity() const;
         double          getMass() const;
         double          getRadius() const;
+        Type            getType() const;
         sf::Vector2f    getStrongestAttractorPosition() const;
         sf::Vector2d    getVelocity() const;
 

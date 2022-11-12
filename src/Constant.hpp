@@ -37,7 +37,7 @@ namespace CONSTANT
 
     // PLANET EXPLOSION
     const double EXPLOSION_PLANET_SPEED_MULTIPLIER  = 1.05; // adjust explosion speed on regular
-    const double EXPLOSION_ROCHE_SPEED_MULTIPLIER   = 0.98; // adjust explosion speed on roche limit explosion
+    const double EXPLOSION_ROCHE_SPEED_MULTIPLIER   = 0.685; // adjust explosion speed on roche limit explosion
 
     // SCHWARZSCHILD RADIUS MULTIPLIER
     const double SCHWARZSCHILD_MULTIPLIER   = 0.001;
@@ -61,7 +61,8 @@ namespace CONSTANT
     const double VELOCITY_LINE_MULTIPLIER   = 2.5;
 
     // OTHER
-    const float  SLINGSHOT_MULTIPLIER = 2.5;
+    const float  SLINGSHOT_SPEED_MULTIPLIER = 1e-3;
+    const float  SLINGSHOT_DRAW_MULTIPLIER  = 2.5;
 
     //SYSTEM GENERATOR
     const double MASS_MULTIPLIER = 130;
